@@ -5,15 +5,23 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "interests")
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
+
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class Interest {
+@Entity
+@Table(name = "interests")
+public class Interest implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
 
+    @ManyToMany(mappedBy = "interests")
+    private Set<Student> students = new HashSet<>();
 }

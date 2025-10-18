@@ -6,16 +6,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
-@Entity
-@Table(name = "roles")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-
+@Entity
+@Table(name = "subjects")
 public class Subject implements Serializable {
-   @Id
-   @GeneratedValue(strategy = GenerationType.IDENTITY)
-   private Long id;
-   private String name;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    @ManyToMany(mappedBy = "subjects")
+    private Set<Teacher> teachers = new HashSet<>();
 }

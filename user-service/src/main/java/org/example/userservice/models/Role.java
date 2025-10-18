@@ -19,7 +19,7 @@ public class Role implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private String name;  // optional field if you want role name like "ADMIN", "USER"
+    private String name;
 
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
     private List<User> users = new ArrayList<>();

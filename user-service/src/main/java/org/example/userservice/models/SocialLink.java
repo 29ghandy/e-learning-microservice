@@ -5,14 +5,22 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "social-links")
+import java.io.Serializable;
+
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class SocialLinks {
+@Entity
+@Table(name = "social_links")
+public class SocialLink implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
+
     private String url;
+
+    @ManyToOne
+    @JoinColumn(name = "teacher_id")
+    private Teacher teacher;
 }
