@@ -12,7 +12,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create-only
     show-sql: true
     database-platform: org.hibernate.dialect.MySQLDialect
 

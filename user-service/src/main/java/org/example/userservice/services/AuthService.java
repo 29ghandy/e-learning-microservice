@@ -7,7 +7,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.example.userservice.models.Role;
 import org.example.userservice.models.Users;
+import org.example.userservice.repositories.RoleRepository;
 import org.example.userservice.repositories.UserRepository;
 import org.example.userservice.requestBodies.SignUpRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,7 +32,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
-
+    private final RoleRepository roleRepository;
     public String signUp(SignUpRequest requestBody) throws Exception {
 
         if (userRepository.findByEmail(requestBody.getEmail()).isPresent()) {
@@ -40,12 +42,14 @@ public class AuthService {
 
         String imageUrl = saveImage(requestBody.getImage());
 
-
         Users user = new Users();
         user.setName(requestBody.getName());
         user.setEmail(requestBody.getEmail());
         user.setPassword(encoder.encode(requestBody.getPassword()));
+        Role role = roleRepository.findByName(requestBody.getRole());
+        user.setRole(role);
         user.setImageUrl(imageUrl);
+
         userRepository.save(user);
 
         return "User registered successfully!";
@@ -54,7 +58,7 @@ public class AuthService {
     private String saveImage(MultipartFile imageFile) throws IOException {
         if (imageFile == null || imageFile.isEmpty()) return null;
 
-        String uploadDir = "uploads/";
+        String uploadDir = "user-service/uploads/";
         Files.createDirectories(Paths.get(uploadDir));
 
         String filePath = uploadDir + System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
