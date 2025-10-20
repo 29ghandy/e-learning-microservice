@@ -1,11 +1,13 @@
 package org.example.userservice.repositories;
 
-import org.example.userservice.models.User;
+import org.example.userservice.models.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-public interface UserRepository extends JpaRepository<User, Long> {
-    User findByUsername(String username);
-    void deleteByUsername(String username);
-    void updatePassword(String username, String password);
+import java.util.Optional;
+
+@Repository
+public interface UserRepository  extends JpaRepository<Users, Long>  {
+
+    Optional<Users> findByEmail(String email);
 }
