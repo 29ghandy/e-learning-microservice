@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
-    UserRepository userRepository;
+    private final UserRepository userRepository;
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         Users user = userRepository.findByEmail(username)

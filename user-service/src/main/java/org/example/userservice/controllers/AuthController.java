@@ -3,12 +3,15 @@ package org.example.userservice.controllers;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.models.Users;
+import org.example.userservice.requestBodies.LoginRequest;
 import org.example.userservice.requestBodies.SignUpRequest;
 import org.example.userservice.services.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
@@ -28,5 +31,18 @@ public class AuthController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 
+    }
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest requestBody, BindingResult bindingResult) throws Exception {
+        if (bindingResult.hasErrors()) {
+            return new ResponseEntity<>( bindingResult.getAllErrors(), HttpStatus.BAD_REQUEST);
+        }
+        try {
+            Map<String,String> tokens = authService.login(requestBody);
+            return ResponseEntity.ok(tokens);
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

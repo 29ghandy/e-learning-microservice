@@ -1,70 +1,81 @@
 package org.example.userservice.services;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.example.userservice.models.Role;
 import org.example.userservice.models.Users;
-import org.example.userservice.repositories.RoleRepository;
 import org.example.userservice.repositories.UserRepository;
+import org.example.userservice.requestBodies.LoginRequest;
 import org.example.userservice.requestBodies.SignUpRequest;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.example.userservice.services.helper.roleIDFinder.RoleFinderFactory;
+import org.example.userservice.services.helper.roleIDFinder.RoleFinderStrategy;
+import org.example.userservice.services.helper.userSaving.SignUpFactory;
+import org.example.userservice.services.helper.userSaving.UserSave;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.example.userservice.config.SecurityConfig.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Value;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder encoder;
-    private final RoleRepository roleRepository;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+    private final SignUpFactory signupFactory;
+    private  final RoleFinderFactory roleFinderFactory;
+    @Value(("${jwt.access.expire}"))
+    private long accessTokenExpires;
+    @Value("${jwt.access.expire}")
+    private long refreshTokenExpires;
+
+
     public String signUp(SignUpRequest requestBody) throws Exception {
 
         if (userRepository.findByEmail(requestBody.getEmail()).isPresent()) {
             throw new Exception("Email already registered");
         }
 
-
-        String imageUrl = saveImage(requestBody.getImage());
-
-        Users user = new Users();
-        user.setName(requestBody.getName());
-        user.setEmail(requestBody.getEmail());
-        user.setPassword(encoder.encode(requestBody.getPassword()));
-        Role role = roleRepository.findByName(requestBody.getRole());
-        user.setRole(role);
-        user.setImageUrl(imageUrl);
-
-        userRepository.save(user);
-
+        UserSave strategy = signupFactory.getStrategy(requestBody.getRole());
+        strategy.signUp(requestBody);
         return "User registered successfully!";
     }
 
-    private String saveImage(MultipartFile imageFile) throws IOException {
-        if (imageFile == null || imageFile.isEmpty()) return null;
 
-        String uploadDir = "user-service/uploads/";
-        Files.createDirectories(Paths.get(uploadDir));
+    public Map<String, String> login(@RequestBody @Valid LoginRequest requestBody) throws Exception {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            requestBody.getEmail(),
+                            requestBody.getPassword()
+                    )
+            );
 
-        String filePath = uploadDir + System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
-        Path path = Paths.get(filePath);
-        Files.copy(imageFile.getInputStream(), path);
 
-        return filePath;
+            Users user = userRepository.findByEmail(requestBody.getEmail())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + requestBody.getEmail()));
+
+            RoleFinderStrategy roleFinderStrategy = roleFinderFactory.getStrategy(user.getRole().getName() + " ROLE");
+            long id = roleFinderStrategy.findRoleID(user.getId());
+
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("role", user.getRole().getName());
+            claims.put("email", user.getEmail());
+            claims.put("id", id);
+
+
+            String token = jwtService.generateToken(claims, user);
+
+            return Map.of("token", token);
+        } catch (Exception e) {
+            throw new Exception("Invalid login credentials: " + e.getMessage());
+        }
     }
+
+
 }
