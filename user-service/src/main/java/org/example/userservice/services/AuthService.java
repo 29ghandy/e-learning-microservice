@@ -1,22 +1,29 @@
 package org.example.userservice.services;
 
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.models.Users;
 import org.example.userservice.repositories.UserRepository;
 import org.example.userservice.requestBodies.LoginRequest;
 import org.example.userservice.requestBodies.SignUpRequest;
-import org.example.userservice.services.helper.roleIDFinder.RoleFinderFactory;
-import org.example.userservice.services.helper.roleIDFinder.RoleFinderStrategy;
+import org.example.userservice.services.helper.userFinder.UserFinderFactory;
+import org.example.userservice.services.helper.userFinder.UserFinderStrategy;
 import org.example.userservice.services.helper.userSaving.SignUpFactory;
 import org.example.userservice.services.helper.userSaving.UserSave;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.beans.factory.annotation.Value;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,10 +35,11 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final SignUpFactory signupFactory;
-    private  final RoleFinderFactory roleFinderFactory;
+    private  final UserFinderFactory userFinderFactory;
+    private final UserDetailsService userDetailsService;
     @Value(("${jwt.access.expire}"))
     private long accessTokenExpires;
-    @Value("${jwt.access.expire}")
+    @Value("${jwt.refresh.expire}")
     private long refreshTokenExpires;
 
 
@@ -47,7 +55,7 @@ public class AuthService {
     }
 
 
-    public Map<String, String> login(@RequestBody @Valid LoginRequest requestBody) throws Exception {
+    public String login(@RequestBody @Valid LoginRequest requestBody, HttpServletResponse response) throws Exception {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -60,22 +68,82 @@ public class AuthService {
             Users user = userRepository.findByEmail(requestBody.getEmail())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found: " + requestBody.getEmail()));
 
-            RoleFinderStrategy roleFinderStrategy = roleFinderFactory.getStrategy(user.getRole().getName() + " ROLE");
-            long id = roleFinderStrategy.findRoleID(user.getId());
+            UserFinderStrategy userFinderStrategy = userFinderFactory.getStrategy(user.getRole().getName() + " ROLE");
+            long id = (user.getRole().getName().equals( "TEACHER") || user.getRole().getName().equals( "STUDENT"))? userFinderStrategy.findRoleID(user.getId()): user.getId();
 
             Map<String, Object> claims = new HashMap<>();
             claims.put("role", user.getRole().getName());
-            claims.put("email", user.getEmail());
             claims.put("id", id);
 
 
-            String token = jwtService.generateToken(claims, user);
+            String accessToken = jwtService.generateToken(claims, user,accessTokenExpires);
+            String refreshToken = jwtService.generateToken(claims, user,refreshTokenExpires);
 
-            return Map.of("token", token);
+            System.out.println(accessToken);
+            ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .sameSite("Strict")
+                    .maxAge(accessTokenExpires)
+                    .build();
+
+            ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .sameSite("Strict")
+                    .maxAge(refreshTokenExpires)
+                    .build();
+
+            response.addHeader("Set-Cookie", accessCookie.toString());
+            response.addHeader("Set-Cookie", refreshCookie.toString());
+
+            return "Logged in Successfully";
         } catch (Exception e) {
             throw new Exception("Invalid login credentials: " + e.getMessage());
         }
-    }
 
+    }
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) throws Exception
+    {
+        String refreshToken = jwtService.extractTokenFromCookies(request).get("refresh-token");
+        String username = jwtService.extractUserName(refreshToken);
+        if (username == null) {
+            throw new Exception("Invalid refresh token");
+        }
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        Claims claims = jwtService.extractClaims(refreshToken);
+
+        String accessToken = jwtService.generateToken(claims, userDetails, accessTokenExpires);
+        System.out.println(accessToken);
+        ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("Strict")
+                .maxAge(accessTokenExpires)
+                .build();
+        response.addHeader("Set-Cookie", accessCookie.toString());
+
+        return ResponseEntity.ok("Token refreshed");
+    }
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        ResponseCookie deleteAccess = ResponseCookie.from("access_token", "")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        ResponseCookie deleteRefresh = ResponseCookie.from("refresh_token", "")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        response.addHeader("Set-Cookie", deleteAccess.toString());
+        response.addHeader("Set-Cookie", deleteRefresh.toString());
+
+        return ResponseEntity.ok("Logged out Successfully");
+    }
 
 }

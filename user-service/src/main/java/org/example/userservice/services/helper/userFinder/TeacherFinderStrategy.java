@@ -1,4 +1,4 @@
-package org.example.userservice.services.helper.roleIDFinder;
+package org.example.userservice.services.helper.userFinder;
 
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.models.Teacher;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
         "TEACHER ROLE"
 )
 @RequiredArgsConstructor
-public class TeacherIDStrategy implements RoleFinderStrategy{
+public class TeacherFinderStrategy implements UserFinderStrategy {
 
     private final TeacherRepository teacherRepository;
     @Override

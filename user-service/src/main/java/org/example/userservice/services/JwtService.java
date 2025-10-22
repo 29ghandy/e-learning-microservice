@@ -5,13 +5,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,17 +24,14 @@ public class JwtService {
     public String extractUserName(String token) {
         return extractClaim(token,Claims::getSubject);
     }
-    public  String generateToken(  UserDetails userDetails) {
 
-        return generateToken(new HashMap<>(), userDetails);
-    }
-    public  String generateToken(Map<String, Object> claims,   UserDetails userDetails) {
+    public  String generateToken(Map<String, Object> claims,   UserDetails userDetails, long expiration ) {
 
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith( SignatureAlgorithm.HS256,getSignInKey())
                 .compact();
                     }
@@ -49,14 +46,14 @@ public class JwtService {
     }
 
     private boolean isTokenExpired(String token) {
-        return extractExpiratioin(token).before(new Date());
+        return extractExpiration(token).before(new Date());
     }
 
-    private Date extractExpiratioin(String token) {
+    private Date extractExpiration(String token) {
         return extractClaim(token,Claims::getExpiration);
     }
 
-    private  Claims extractClaims(String token) {
+    public  Claims extractClaims(String token) {
         return Jwts.parserBuilder().
                 setSigningKey(getSignInKey())
                 .build()
@@ -69,5 +66,17 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-
+    public Map<String, String> extractTokenFromCookies(HttpServletRequest request) {
+        if (request.getCookies() == null) return null;
+        Map<String, String> tokens = new HashMap<>();
+        for (Cookie cookie : request.getCookies()) {
+            if (cookie.getName().equals("access_token")) {
+                tokens.put(cookie.getName(), cookie.getValue());
+            }
+            if (cookie.getName().equals("refresh_token")) {
+                tokens.put(cookie.getName(), cookie.getValue());
+            }
+        }
+        return tokens;
+    }
 }

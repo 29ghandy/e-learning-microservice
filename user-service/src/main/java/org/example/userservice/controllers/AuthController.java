@@ -1,5 +1,7 @@
 package org.example.userservice.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.models.Users;
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService ;
@@ -32,17 +34,35 @@ public class AuthController {
         }
 
     }
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest requestBody, BindingResult bindingResult) throws Exception {
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest requestBody, BindingResult bindingResult, HttpServletResponse response) throws Exception {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>( bindingResult.getAllErrors(), HttpStatus.BAD_REQUEST);
         }
         try {
-            Map<String,String> tokens = authService.login(requestBody);
-            return ResponseEntity.ok(tokens);
+            String message = authService.login(requestBody, response);
+            return ResponseEntity.ok(message);
         }
         catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        try {
+            return authService.refreshToken(request, response);
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) throws Exception
+    {
+       return authService.logout(request, response);
+    }
+
 }

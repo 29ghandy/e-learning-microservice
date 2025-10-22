@@ -1,4 +1,4 @@
-package org.example.userservice.services.helper.roleIDFinder;
+package org.example.userservice.services.helper.userFinder;
 
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.models.Student;
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service("STUDENT ROLE")
 @RequiredArgsConstructor
-public class StudentIDStrategy implements RoleFinderStrategy{
+public class StudentFinderStrategy implements UserFinderStrategy {
     private final StudentRepository studentRepository;
     @Override
     public long findRoleID(long userID) {
