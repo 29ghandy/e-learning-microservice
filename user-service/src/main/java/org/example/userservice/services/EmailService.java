@@ -24,7 +24,7 @@ public class EmailService {
         message.setText("Reset password code : " + otp + "\n" +
                 "It is valid for 5 minutes");
 
-        mailSender.send(message);
+        javaMailSender.send(message);
         return otp;
     }
 

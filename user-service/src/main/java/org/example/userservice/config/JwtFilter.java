@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @AllArgsConstructor
@@ -31,10 +32,11 @@ public class JwtFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        Map<String, String> tokens = jwtService.extractTokenFromCookies(request);
+        Map<String, String> tokens = new HashMap<>();
+                tokens = jwtService.extractTokenFromCookies(request);
         final String username;
 
-        if (tokens.isEmpty()) {
+        if (tokens == null ||  tokens.isEmpty()) {
             filterChain.doFilter(request, response);
             return;
         }

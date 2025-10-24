@@ -40,7 +40,7 @@ public class PasswordService {
         Users user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         String otp = otpService.generateOtp();
         redisService.redisSaveForgetPasswordCode(user.getEmail(), otp);
-       emailService.sendForgetPasswordCode("omarmamdouh753@gmail.com","change ur password",email,otp);
+        emailService.sendForgetPasswordCode("omarmamdouh753@gmail.com","change ur password",email,otp);
        return "Email sent successfully";
     }
 }
