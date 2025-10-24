@@ -1,4 +1,4 @@
-package org.example.userservice.services.helper.userFinder;
+package org.example.userservice.services.helper.designPatterns.userFinder;
 
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.models.Teacher;

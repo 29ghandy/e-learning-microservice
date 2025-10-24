@@ -1,4 +1,4 @@
-package org.example.userservice.services.helper.userSaving;
+package org.example.userservice.services.helper.designPatterns.userSaving;
 
 import org.example.userservice.requestBodies.SignUpRequest;
 

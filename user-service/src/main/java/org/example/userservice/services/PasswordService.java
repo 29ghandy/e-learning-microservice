@@ -6,7 +6,9 @@ import org.example.userservice.models.Users;
 import org.example.userservice.repositories.UserRepository;
 import org.example.userservice.requestBodies.ChangePasswordRequest;
 import org.example.userservice.requestBodies.ResetPasswordRequest;
-import org.springframework.http.ResponseEntity;
+import org.example.userservice.services.helper.helperServices.EmailService;
+import org.example.userservice.services.helper.helperServices.OTPService;
+import org.example.userservice.services.helper.helperServices.RedisService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,7 +21,7 @@ public class PasswordService {
     private final PasswordEncoder passwordEncoder;
     private final OTPService otpService;
     private final RedisService redisService;
-    private final  EmailService emailService;
+    private final EmailService emailService;
     public String changePassword(@RequestBody ChangePasswordRequest request) throws BadRequestException {
         Users user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
                 new UsernameNotFoundException("User not found"));

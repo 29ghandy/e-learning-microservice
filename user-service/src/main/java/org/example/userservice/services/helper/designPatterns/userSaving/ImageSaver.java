@@ -1,4 +1,4 @@
-package org.example.userservice.services.helper.userSaving;
+package org.example.userservice.services.helper.designPatterns.userSaving;
 
 import org.springframework.web.multipart.MultipartFile;
 

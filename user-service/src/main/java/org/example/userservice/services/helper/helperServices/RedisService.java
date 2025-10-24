@@ -1,12 +1,8 @@
-package org.example.userservice.services;
+package org.example.userservice.services.helper.helperServices;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import redis.clients.jedis.Jedis;
 
 import java.time.Duration;
 

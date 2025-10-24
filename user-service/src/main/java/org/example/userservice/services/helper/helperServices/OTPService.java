@@ -1,4 +1,4 @@
-package org.example.userservice.services;
+package org.example.userservice.services.helper.helperServices;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
