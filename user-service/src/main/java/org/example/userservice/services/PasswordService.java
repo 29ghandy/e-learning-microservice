@@ -5,6 +5,7 @@ import org.apache.coyote.BadRequestException;
 import org.example.userservice.models.Users;
 import org.example.userservice.repositories.UserRepository;
 import org.example.userservice.requestBodies.ChangePasswordRequest;
+import org.example.userservice.requestBodies.ResetPasswordRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,5 +43,16 @@ public class PasswordService {
         redisService.redisSaveForgetPasswordCode(user.getEmail(), otp);
         emailService.sendForgetPasswordCode("omarmamdouh753@gmail.com","change ur password",email,otp);
        return "Email sent successfully";
+    }
+
+    public String resetPassword(@RequestBody  ResetPasswordRequest resetPasswordRequest) throws Exception {
+        Users connectedUser = userRepository.findByEmail(resetPasswordRequest.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User with username: " + resetPasswordRequest.getEmail() + " is not found"));
+
+
+        redisService.validateOtp(resetPasswordRequest.getEmail(),resetPasswordRequest.getCode());
+        connectedUser.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
+        userRepository.save(connectedUser);
+        return "Password reset successfully";
     }
 }
