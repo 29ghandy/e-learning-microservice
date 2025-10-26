@@ -11,7 +11,7 @@ public class UserFinderFactory {
 
     public UserFinderStrategy getStrategy(String role) {
         UserFinderStrategy strategy = strategies.get(role.toUpperCase());
-        if (strategy == null) throw new IllegalArgumentException("Unknown role: " + role);
+        //throw new IllegalArgumentException("Unknown role: " + role);
         return strategy;
     }
 }

@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.models.Users;
+import org.example.userservice.requestBodies.HashPasswordRequest;
 import org.example.userservice.requestBodies.LoginRequest;
 import org.example.userservice.requestBodies.SignUpRequest;
 import org.example.userservice.services.AuthService;
@@ -65,4 +66,8 @@ public class AuthController {
        return authService.logout(request, response);
     }
 
+    @GetMapping("hash-password")
+    public String hash(@RequestBody HashPasswordRequest request) {
+        return authService.hash(request);
+    }
 }

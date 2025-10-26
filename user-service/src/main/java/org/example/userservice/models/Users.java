@@ -9,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class Users implements UserDetails,Serializable {
     private String email;
     private String password;
     private String imageUrl;
+    private boolean isBanned;
+    private String banReason;
+    private LocalDateTime banExpiresAt;
 
     @ManyToOne
     @JoinColumn(name = "role_id")

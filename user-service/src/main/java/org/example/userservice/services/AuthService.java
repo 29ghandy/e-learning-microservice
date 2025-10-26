@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.models.Users;
 import org.example.userservice.repositories.UserRepository;
+import org.example.userservice.requestBodies.HashPasswordRequest;
 import org.example.userservice.requestBodies.LoginRequest;
 import org.example.userservice.requestBodies.SignUpRequest;
 import org.example.userservice.services.helper.helperServices.JwtService;
@@ -22,6 +23,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +41,7 @@ public class AuthService {
     private final SignUpFactory signupFactory;
     private  final UserFinderFactory userFinderFactory;
     private final UserDetailsService userDetailsService;
+    private final BCryptPasswordEncoder passwordEncoder;
     @Value(("${jwt.access.expire}"))
     private long accessTokenExpires;
     @Value("${jwt.refresh.expire}")
@@ -71,6 +74,9 @@ public class AuthService {
                     .orElseThrow(() -> new UsernameNotFoundException("User not found: " + requestBody.getEmail()));
 
             UserFinderStrategy userFinderStrategy = userFinderFactory.getStrategy(user.getRole().getName() + " ROLE");
+            if (userFinderStrategy == null && !user.getRole().getName().equals("ADMIN") &&  !user.getRole().getName().equals("SUPER ADMIN")) {
+                throw new IllegalArgumentException("Unknown role: " + user.getRole().getName());
+            }
             long id = (user.getRole().getName().equals( "TEACHER") || user.getRole().getName().equals( "STUDENT"))? userFinderStrategy.findRoleID(user.getId()): user.getId();
 
             Map<String, Object> claims = new HashMap<>();
@@ -148,4 +154,7 @@ public class AuthService {
         return ResponseEntity.ok("Logged out Successfully");
     }
 
+    public String hash(HashPasswordRequest request) {
+        return passwordEncoder.encode(request.getPassword());
+    }
 }
