@@ -316,8 +316,84 @@ public class AdminService {
         return response;
     }
 
-//    public BulkBanResponse bulkBanUsers(List<BulkBanRequest> request) {
-//
-//    }
+    @Transactional
+    public BulkBanResponse bulkBanUsers(List<BulkBanRequest> requests) {
+        BulkBanResponse response = new BulkBanResponse();
+        if (requests == null || requests.isEmpty()) {
+            return response;
+        }
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new RuntimeException("Unauthenticated");
+        }
+
+        Users caller = userRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("Caller not found"));
+
+        if (!(caller.getRole().getName().equals("ADMIN") || caller.getRole().getName().equals("SUPER ADMIN"))) {
+            throw new RuntimeException("Only Admins or Super Admins can update users");
+        }
+
+        Set<String> emails = requests.stream()
+                .map(BulkBanRequest::getEmail)
+                .collect(Collectors.toSet());
+
+        List<Users> fetchedUsers = userRepository.findAllByEmailIn(emails);
+
+        Map<String, Users> userMap = fetchedUsers.stream()
+                .collect(Collectors.toMap(Users::getEmail, u -> u));
+
+        List<Users> updatedUsers = new ArrayList<>();
+
+        for (BulkBanRequest req : requests) {
+            Users target = userMap.get(req.getEmail());
+
+            if (target == null) {
+                response.getFailed().add(new BanFailedDto(
+                        null,
+                        req.getEmail(),
+                        "User not found"
+                ));
+                continue;
+            }
+
+            if (target.getRole().getName().equals("ADMIN") || target.getRole().getName().equals("SUPER ADMIN")) {
+                response.getFailed().add(new BanFailedDto(
+                        target.getId(),
+                        target.getEmail(),
+                        "Cannot ban user with role: " + target.getRole().getName()
+                ));
+                continue;
+            }
+
+            LocalDateTime banExpiresAt = null;
+            if (req.getDurationDays() != null && req.getDurationDays() > 0) {
+                banExpiresAt = LocalDateTime.now().plusDays(req.getDurationDays());
+            }
+
+            target.setBanned(true);
+            target.setBanReason(req.getReason());
+            target.setBanExpiresAt(banExpiresAt);
+
+            updatedUsers.add(target);
+
+            response.getBanned().add(new BanSuccessDto(
+                    target.getId(),
+                    target.getEmail(),
+                    banExpiresAt,
+                    "User banned successfully",
+                    req.getReason(),
+                    req.getDurationDays()
+            ));
+        }
+
+        if (!updatedUsers.isEmpty()) {
+            userRepository.saveAll(updatedUsers);
+        }
+
+        return response;
+    }
+
 }
 

@@ -62,14 +62,14 @@ public class AdminController {
         }
     }
 
-//    @PutMapping("/ban-users")
-//    public ResponseEntity<?> bulkBanUsers(@RequestBody List<BulkBanRequest> requestBody) {
-//        try {
-//            BulkBanResponse response = adminService.bulkBanUsers(requestBody);
-//            return ResponseEntity.ok(response);
-//        }
-//        catch (Exception e) {
-//            return ResponseEntity.badRequest().body(e.getMessage());
-//        }
-//    }
+    @PutMapping("/ban-users")
+    public ResponseEntity<?> bulkBanUsers(@RequestBody List<BulkBanRequest> requestBody) {
+        try {
+            BulkBanResponse response = adminService.bulkBanUsers(requestBody);
+            return ResponseEntity.ok(response);
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

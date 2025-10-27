@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BulkBanRequest {
-    private List<Long> userIds;
+    private String email;
     private String reason;
     private Integer durationDays;
 }

@@ -12,4 +12,6 @@ public class BanSuccessDto {
     private String email;
     private LocalDateTime banExpiresAt;
     private String message;
+    private String reason;
+    private Integer durationDays;
 }
