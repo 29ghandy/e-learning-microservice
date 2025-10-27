@@ -16,48 +16,15 @@ import java.util.List;
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 public class AdminController {
+
     private final AdminService adminService;
-
-    @PostMapping("/create-admin")
-    public ResponseEntity<?> createAdmin(@RequestBody @Valid AdminCreateRequest requestBody) {
-        try {
-            String message = adminService.createAdmin(requestBody);
-            return ResponseEntity.ok().body(message);
-        }
-        catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @PostMapping("/ban-admin")
-    public ResponseEntity<?> banAdmin(@RequestBody @Valid BanUserRequest requestBody) {
-        try {
-            String message = adminService.banAdmin(requestBody);
-            return ResponseEntity.ok().body(message);
-        }
-        catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @PostMapping("/create-users")
-    public ResponseEntity<?> bulkCreateUsers(@RequestBody List<BulkCreateUserRequest> requestBody) {
-        try {
-            BulkCreateResponse response = adminService.bulkCreateUsers(requestBody);
-            return ResponseEntity.ok(response);
-        }
-        catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
 
     @PutMapping("/update-users")
     public ResponseEntity<?> bulkUpdateUsers(@RequestBody List<BulkUpdateUsersRequest> requestBody) {
         try {
             BulkUpdateResponse response = adminService.bulkUpdateUsers(requestBody);
             return ResponseEntity.ok(response);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -67,8 +34,7 @@ public class AdminController {
         try {
             BulkBanResponse response = adminService.bulkBanUsers(requestBody);
             return ResponseEntity.ok(response);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

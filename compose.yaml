@@ -1,1 +1,35 @@
 services:
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: user-service/Dockerfile
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
+      - EMAIL_SENDER_MAIL=${EMAIL_SENDER_MAIL}
+      - EMAIL_SENDER_PASSWORD=${EMAIL_SENDER_PASSWORD}
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/userdb
+
+    depends_on:
+      - mysql
+      - redis
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ghandy
+      MYSQL_DATABASE: userdb
+    ports:
+      - "3307:3306"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6378:6379"
