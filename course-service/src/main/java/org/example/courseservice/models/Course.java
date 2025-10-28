@@ -1,14 +1,31 @@
 package org.example.courseservice.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Table(name = "courses")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Course {
     @Id
-    long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private Long teacherId;
+    private Double price;
+    private String thumbnailPath;
+    private String category;
+    private Integer numberOfHours;
+    private Double averageRating;
 
-    String name;
-    String description;
-
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Section> sections = new ArrayList<>();
 }
