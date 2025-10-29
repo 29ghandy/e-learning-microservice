@@ -29,6 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.sql.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,7 +75,10 @@ public class AuthService {
 
             Users user = userRepository.findByEmail(requestBody.getEmail())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found: " + requestBody.getEmail()));
-
+            if(user.isBanned())
+            {
+                throw new Exception("User banned");
+            }
             UserFinderStrategy userFinderStrategy = userFinderFactory.getStrategy(user.getRole().getName() + " ROLE");
             if (userFinderStrategy == null && !user.getRole().getName().equals("ADMIN") &&  !user.getRole().getName().equals("SUPER ADMIN")) {
                 throw new IllegalArgumentException("Unknown role: " + user.getRole().getName());

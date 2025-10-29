@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +26,9 @@ public class Course {
     private String category;
     private Integer numberOfHours;
     private Double averageRating;
-
+    private Double discountPercentage;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Section> sections = new ArrayList<>();
