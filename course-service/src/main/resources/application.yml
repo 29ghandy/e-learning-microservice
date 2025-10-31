@@ -4,10 +4,15 @@ spring:
   application:
     name:
       course-service
+  servlet:
+    multipart:
+        location: /uploads
+        max-file-size: 500MB
+        max-request-size: 500MB
   datasource:
-    url: jdbc:postgresql://localhost:5432/coursedb
-    username: root
-    password: AliSami14
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
