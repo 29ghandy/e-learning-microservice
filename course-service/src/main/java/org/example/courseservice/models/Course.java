@@ -29,6 +29,7 @@ public class Course {
     private Double discountPercentage;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    private String description;
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Section> sections = new ArrayList<>();

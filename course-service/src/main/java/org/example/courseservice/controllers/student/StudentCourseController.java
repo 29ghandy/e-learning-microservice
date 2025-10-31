@@ -1,10 +1,12 @@
 package org.example.courseservice.controllers.student;
 
 import lombok.RequiredArgsConstructor;
+import org.example.courseservice.indexies.CourseIndex;
 import org.example.courseservice.models.Course;
 import org.example.courseservice.services.CourseService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -17,5 +19,9 @@ public class StudentCourseController {
     @GetMapping("/")
     public List<Course> getAllCourses() {
         return courseService.getAllCourses();
+    }
+    @GetMapping("/search")
+    public List<CourseIndex> searchCourses(@RequestParam String search) {
+        return courseService.findByNameContainingIgnoreCase(search);
     }
 }

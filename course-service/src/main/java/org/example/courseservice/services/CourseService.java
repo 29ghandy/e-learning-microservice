@@ -1,12 +1,15 @@
 package org.example.courseservice.services;
 
 import lombok.RequiredArgsConstructor;
+import org.example.courseservice.indexies.CourseIndex;
 import org.example.courseservice.models.Course;
 import org.example.courseservice.repositories.CourseRepository;
+import org.example.courseservice.repositories.CourseSearchRepository;
 import org.example.courseservice.requestBodies.CreateCourseRequest;
 import org.example.courseservice.requestBodies.CreateDiscountRequest;
 import org.example.courseservice.requestBodies.DeleteCourseRequest;
 import org.example.courseservice.requestBodies.UpdateCourseRequest;
+import org.example.courseservice.services.helper.CourseSyncService;
 import org.example.courseservice.services.helper.ImageSaver;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +22,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CourseService {
     private final CourseRepository courseRepository;
-
+    private final CourseSearchRepository courseSearchRepository;
+    private final CourseSyncService courseSyncService;
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
     }
@@ -42,6 +46,7 @@ public class CourseService {
         course.setStartDate(LocalDateTime.now());
         course.setEndDate(LocalDateTime.now().plusDays(1));
         courseRepository.save(course);
+        courseSyncService.indexCourse(course);
         return course;
     }
 
@@ -65,6 +70,8 @@ public class CourseService {
             course.setThumbnailPath(path);
         }
        courseRepository.save(course);
+      courseSyncService.indexCourse(course);
+
         return "course updated";
     }
 
@@ -86,5 +93,8 @@ public class CourseService {
         course.setEndDate(LocalDateTime.now().plusDays(request.getNumberOfDays()));
         courseRepository.save(course);
         return "discount added";
+    }
+    public List<CourseIndex> findByNameContainingIgnoreCase(String name){
+        return courseSearchRepository.findByNameContainingIgnoreCase(name);
     }
 }

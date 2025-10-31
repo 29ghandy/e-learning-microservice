@@ -4,6 +4,13 @@ spring:
   application:
     name:
       course-service
+  data:
+    elasticsearch:
+      client:
+        elasticsearch:
+          uris: http://localhost:9200
+      repositories:
+        enabled: true
   servlet:
     multipart:
         location: /uploads
