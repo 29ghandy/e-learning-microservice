@@ -28,7 +28,7 @@ public class CourseService {
         return courseRepository.findAll();
     }
 
-    public String addCourse(CreateCourseRequest request) throws IOException {
+    public Course addCourse(CreateCourseRequest request) throws IOException {
         Course course = new Course();
         course.setName(request.getCourseName());
         course.setCategory(request.getCategory());
@@ -42,7 +42,7 @@ public class CourseService {
         course.setStartDate(LocalDateTime.now());
         course.setEndDate(LocalDateTime.now().plusDays(1));
         courseRepository.save(course);
-        return "course created";
+        return course;
     }
 
     public String updateCourse(UpdateCourseRequest request) throws Exception {

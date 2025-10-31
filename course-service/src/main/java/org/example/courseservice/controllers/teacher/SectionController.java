@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/course/teacher")
+@RequestMapping("/api/course/teacher/section")
 public class SectionController {
     private final SectionService sectionService;
 

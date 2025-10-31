@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("api/course/teacher/upload")
+@RequestMapping("api/course/teacher/file")
 @RequiredArgsConstructor
 public class FileController {
     private final FileService fileService;
 
-    @PostMapping("/chunk")
+    @PostMapping("/upload/chunk")
     public ResponseEntity<?> addFile(@ModelAttribute @Valid UploadFileRequest requestBody, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
