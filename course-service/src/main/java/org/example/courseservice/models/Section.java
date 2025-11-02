@@ -28,8 +28,13 @@ public class Section {
     private String title;
 
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<File> files = new ArrayList<>();
+    private List<SectionFile> files = new ArrayList<>();
 
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Quiz> quizzes = new ArrayList<>();
+
+    public void addFile(SectionFile file) {
+        files.add(file);
+        file.setSection(this);
+    }
 }

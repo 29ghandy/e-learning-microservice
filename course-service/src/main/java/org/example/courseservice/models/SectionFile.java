@@ -5,12 +5,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "files")
+@Table(name = "section_files")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class File {
+public class SectionFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,6 +20,8 @@ public class File {
     @JsonIgnore
     private Section section;
 
+    private Long courseId;
+    private String name;
     private String type;
     private String path;
 }

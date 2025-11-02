@@ -30,11 +30,6 @@ public class FileController {
         }
     }
 
-    @PostMapping("/update-file")
-    public ResponseEntity<?> updateFile(@RequestBody Section section) {
-        return null;
-    }
-
     @DeleteMapping("/delete-file")
     public ResponseEntity<?> removeFiles(@RequestBody Section section) {
         return null;

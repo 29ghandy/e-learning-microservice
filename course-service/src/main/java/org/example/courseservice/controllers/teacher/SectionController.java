@@ -47,16 +47,4 @@ public class SectionController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @PostMapping("/add-files") // bulk
-    public ResponseEntity<?> addFiles(@RequestBody Section section) {
-              return null;
-    }
-    @PostMapping("/update-file")
-    public ResponseEntity<?> updateFile(@RequestBody Section section) {
-        return null;
-    }
-    @DeleteMapping("/delete-files") // bulk
-    public ResponseEntity<?> removeFiles(@RequestBody Section section) {
-        return null;
-    }
 }

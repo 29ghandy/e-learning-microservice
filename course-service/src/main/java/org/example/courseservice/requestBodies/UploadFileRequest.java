@@ -9,5 +9,8 @@ public class UploadFileRequest {
     private long chunkIndex;
     private long totalChunks;
     private MultipartFile file;
-    private long sectionID;
+    private long sectionId;
+    private Long courseId;
+    private String type;
+    private String uploadId;
 }
