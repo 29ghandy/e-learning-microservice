@@ -4,14 +4,16 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class CreateDiscountRequest {
     @NotBlank
     @Min(value = 1, message = "Number of hours must be at least 1")
-    private long numberOfDays;
-    @NotBlank
-    @Min(value = 1, message = "Number of hours must be at least 1")
     private double discountPercentage;
-    private String role;
+    @NotBlank
     private long courseId;
+    private LocalDateTime discountStartDate;
+    private LocalDateTime discountEndDate;
+    private Long discountNumberOfMembers;
 }

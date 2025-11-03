@@ -27,8 +27,9 @@ public class Course {
     private Integer numberOfHours;
     private Double averageRating;
     private Double discountPercentage;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private LocalDateTime discountStartDate;
+    private LocalDateTime discountEndDate;
+    private Long discountNumberOfMembers;
     private String description;
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore

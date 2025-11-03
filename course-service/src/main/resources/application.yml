@@ -11,6 +11,17 @@ spring:
           uris: http://localhost:9200
       repositories:
         enabled: true
+
+    redis:
+      host: localhost
+      port: 6379
+
+    rabbitmq:
+      host: localhost
+      port: 5672
+      username: guest
+      password: guest
+
   servlet:
     multipart:
         location: /uploads

@@ -1,6 +1,7 @@
 package org.example.courseservice.services;
 
 import lombok.RequiredArgsConstructor;
+import org.example.courseservice.dtos.DiscountCacheDTO;
 import org.example.courseservice.indexies.CourseIndex;
 import org.example.courseservice.models.Course;
 import org.example.courseservice.repositories.CourseRepository;
@@ -10,10 +11,15 @@ import org.example.courseservice.requestBodies.CreateDiscountRequest;
 import org.example.courseservice.requestBodies.DeleteCourseRequest;
 import org.example.courseservice.requestBodies.UpdateCourseRequest;
 import org.example.courseservice.services.helper.CourseSyncService;
+import org.example.courseservice.services.helper.DiscountPublisher;
 import org.example.courseservice.services.helper.ImageSaver;
+import org.example.courseservice.services.helper.RedisService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +30,9 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final CourseSearchRepository courseSearchRepository;
     private final CourseSyncService courseSyncService;
+    private final RedisService redisService;
+    private final DiscountPublisher discountPublisher;
+
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
     }
@@ -43,8 +52,8 @@ public class CourseService {
         course.setThumbnailPath(path);
         course.setTeacherId(request.getTeacherId());
         course.setAverageRating(5.0);
-        course.setStartDate(LocalDateTime.now());
-        course.setEndDate(LocalDateTime.now().plusDays(1));
+        course.setDiscountStartDate(LocalDateTime.now());
+        course.setDiscountEndDate(LocalDateTime.now().plusDays(1));
         courseRepository.save(course);
         courseSyncService.indexCourse(course);
         return course;
@@ -85,15 +94,34 @@ public class CourseService {
         courseRepository.delete(course);
         return "course deleted";
     }
-    public String addDiscount(CreateDiscountRequest request) throws Exception {
-        Course course = courseRepository.findById(request.getCourseId()).orElseThrow(() -> new Exception("no such course"));
+
+    public ResponseEntity<?> addDiscount(CreateDiscountRequest request) throws Exception {
+        Optional<Course> c = courseRepository.findById(request.getCourseId());
+        if (c.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+        }
+
+        Course course = c.get();
         course.setDiscountPercentage(request.getDiscountPercentage());
-        course.setPrice(course.getPrice() - course.getPrice() * request.getDiscountPercentage() * 0.01);
-        course.setStartDate(LocalDateTime.now());
-        course.setEndDate(LocalDateTime.now().plusDays(request.getNumberOfDays()));
+        course.setDiscountStartDate(request.getDiscountStartDate());
+        course.setDiscountEndDate(request.getDiscountEndDate());
+        course.setDiscountNumberOfMembers(request.getDiscountNumberOfMembers());
         courseRepository.save(course);
-        return "discount added";
+
+        DiscountCacheDTO cacheDTO = new DiscountCacheDTO(
+                request.getDiscountPercentage(),
+                request.getDiscountStartDate(),
+                request.getDiscountEndDate(),
+                request.getDiscountNumberOfMembers()
+        );
+        Duration ttl = Duration.between(LocalDateTime.now(), request.getDiscountEndDate());
+        redisService.saveDiscount(request.getCourseId(), cacheDTO, ttl);
+
+        discountPublisher.publishDiscount(request.getCourseId(), cacheDTO);
+
+        return ResponseEntity.status(HttpStatus.OK).body(cacheDTO);
     }
+
     public List<CourseIndex> findByNameContainingIgnoreCase(String name){
         return courseSearchRepository.findByNameContainingIgnoreCase(name);
     }
