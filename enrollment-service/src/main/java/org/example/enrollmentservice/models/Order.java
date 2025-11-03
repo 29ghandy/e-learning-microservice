@@ -22,6 +22,7 @@ public class Order {
 
     private Double totalPrice;
 
+    private Long studentId;
     @Enumerated(EnumType.STRING)
     private Status orderStatus;
 

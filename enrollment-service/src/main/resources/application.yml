@@ -15,3 +15,6 @@ spring:
     show-sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+stripe:
+  key: ${STRIPE_KEY}

@@ -4,5 +4,4 @@ public enum Status {
     PAYED,
     PENDING,
     RUN_INTO_PROBLEM,
-    PACKED
 }

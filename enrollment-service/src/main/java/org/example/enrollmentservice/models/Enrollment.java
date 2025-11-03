@@ -21,7 +21,6 @@ public class Enrollment {
 
     private Long studentId;
     private Long courseId;
-    private String paymentLink;
     private LocalDate paymentDate;
     private Double price;
 
