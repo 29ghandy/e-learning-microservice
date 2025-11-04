@@ -13,8 +13,8 @@ public class EnrollmentRequestBody {
     @Min(value = 1, message = "Number of hours must be at least 1")
     private long studentId;
     @NotBlank
-    private List<Pair<Long,Double>> courseIDs ;
+    private List<Pair<Long,Double>> courseIDs;
     @NotBlank
-    private double price;
+    private double totalPrice;
     private String mockCardNumber;
 }

@@ -17,10 +17,8 @@ public class DiscountListener {
         System.out.println("Received discount message for course {}: {} "+
                 message.courseId() + message.discount());
         Duration ttl = Duration.between(LocalDateTime.now(), message.discount.getDiscountEndDate());
-      redisService.saveDiscount(message.courseId,message.discount,ttl);
+        redisService.saveDiscount(message.courseId,message.discount,ttl);
     }
 
-    public record DiscountMessage(Long courseId, DiscountCacheDTO discount) {
-
-    }
+    public record DiscountMessage(Long courseId, DiscountCacheDTO discount) {}
 }

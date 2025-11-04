@@ -6,6 +6,7 @@ import com.stripe.Stripe;
 import com.stripe.StripeClient;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.enrollmentservice.dtos.DiscountCacheDTO;
 import org.example.enrollmentservice.enums.Status;
@@ -16,6 +17,7 @@ import org.example.enrollmentservice.repostories.EnrollmentRepository;
 import org.example.enrollmentservice.repostories.OrderItemsRepository;
 import org.example.enrollmentservice.repostories.OrderRepository;
 import org.example.enrollmentservice.requestBodies.EnrollmentRequestBody;
+import org.example.enrollmentservice.services.helper.DiscountPublisher;
 import org.example.enrollmentservice.services.helper.RedisService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -31,17 +33,34 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PaymentService {
 
-    private final RedisService redisService;
     @Value("${stripe.key}")
     private String stripeKey;
     private final EnrollmentRepository enrollmentRepository;
     private final OrderRepository orderRepository;
     private final OrderItemsRepository orderItemsRepository;
+    private final RedisService redisService;
+    private final DiscountPublisher discountPublisher;
 
-    public ResponseEntity<?> payCourses(EnrollmentRequestBody request) throws StripeException {;
+    @Transactional
+    public ResponseEntity<?> payCourses(EnrollmentRequestBody request) throws StripeException {
+        // loop through list of courseIds
+        // atomic decrement discount members in cache
+        // if decrement successful proceed payment
+
+        List<Pair<Long,Double>> courseIDs = request.getCourseIDs();
+        for (var item : courseIDs) {
+            long discountNumberOfMembers = redisService.atomicDecrementMembers(item.first);
+            if (discountNumberOfMembers == -2) {
+                return ResponseEntity.badRequest().body("Payment failed, please try again");
+            }
+
+            DiscountCacheDTO discountCacheDTO = redisService.getDiscount(item.first).orElse(null);
+            discountPublisher.publishDiscount(item.first, discountCacheDTO);
+        }
+
         Stripe.apiKey = stripeKey;
         Map<String, Object> params = new HashMap<>();
-        long amountInCents = Math.round(request.getPrice() * 100);
+        long amountInCents = Math.round(request.getTotalPrice() * 100);
         params.put("amount", amountInCents);
         params.put("currency", "usd");
         params.put("automatic_payment_methods", Map.of("enabled", true));
@@ -50,7 +69,7 @@ public class PaymentService {
         response.put("clientSecret", paymentIntent.getClientSecret());
 
         Order order = new Order();
-        order.setTotalPrice(request.getPrice());
+        order.setTotalPrice(request.getTotalPrice());
         order.setOrderStatus(Status.valueOf("PAYED"));
         order.setStudentId(request.getStudentId());
         orderRepository.save(order);
@@ -70,9 +89,6 @@ public class PaymentService {
             enrollment.setCourseId(item.first);
             enrollment.setPrice(item.second);
             enrollment.setPaymentDate(LocalDate.now());
-
-         //   DiscountCacheDTO discount = redisService.getDiscount(item.first).orElse(null);
-
         }
         orderItemsRepository.saveAll(orderItemsIds);
         enrollmentRepository.saveAll(enrollments);
