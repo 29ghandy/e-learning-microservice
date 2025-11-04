@@ -54,6 +54,7 @@ public class CourseService {
         course.setAverageRating(5.0);
         course.setDiscountStartDate(LocalDateTime.now());
         course.setDiscountEndDate(LocalDateTime.now().plusDays(1));
+        course.setDescription(request.getCourseDescription());
         courseRepository.save(course);
         courseSyncService.indexCourse(course);
         return course;
@@ -100,21 +101,24 @@ public class CourseService {
         if (c.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         }
-
+        LocalDateTime startDate = LocalDateTime.now();
+        LocalDateTime endDate = startDate.plusDays(request.getNumberOfDays());
         Course course = c.get();
         course.setDiscountPercentage(request.getDiscountPercentage());
-        course.setDiscountStartDate(request.getDiscountStartDate());
-        course.setDiscountEndDate(request.getDiscountEndDate());
+        course.setDiscountStartDate(startDate);
+        course.setDiscountEndDate(endDate);
         course.setDiscountNumberOfMembers(request.getDiscountNumberOfMembers());
         courseRepository.save(course);
 
         DiscountCacheDTO cacheDTO = new DiscountCacheDTO(
                 request.getDiscountPercentage(),
-                request.getDiscountStartDate(),
-                request.getDiscountEndDate(),
-                request.getDiscountNumberOfMembers()
+                startDate,
+                endDate,
+                request.getDiscountNumberOfMembers(),
+                course.getId()
         );
-        Duration ttl = Duration.between(LocalDateTime.now(), request.getDiscountEndDate());
+
+        Duration ttl = Duration.between(startDate, endDate);
         redisService.saveDiscount(request.getCourseId(), cacheDTO, ttl);
 
         discountPublisher.publishDiscount(request.getCourseId(), cacheDTO);

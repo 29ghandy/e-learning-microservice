@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class DiscountListener {
+
       private final   RedisService redisService;
     @RabbitListener(queues = "enrollment.discount.queue")
     public void handleDiscountMessage(DiscountMessage message) {

@@ -7,6 +7,8 @@ import org.example.enrollmentservice.dtos.DiscountCacheDTO;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.Serializable;
+
 @Service
 @RequiredArgsConstructor
 public class DiscountPublisher {
@@ -19,5 +21,5 @@ public class DiscountPublisher {
                 message);
     }
 
-    public record DiscountMessage(Long courseId, DiscountCacheDTO discount) {}
+    public record DiscountMessage(Long courseId, DiscountCacheDTO discount) implements Serializable {}
 }

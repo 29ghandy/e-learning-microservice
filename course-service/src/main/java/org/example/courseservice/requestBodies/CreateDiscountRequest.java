@@ -13,7 +13,6 @@ public class CreateDiscountRequest {
     private double discountPercentage;
     @NotBlank
     private long courseId;
-    private LocalDateTime discountStartDate;
-    private LocalDateTime discountEndDate;
+    private long numberOfDays;
     private Long discountNumberOfMembers;
 }

@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DiscountCacheDTO implements Serializable {
+public class DiscountCacheDTO  implements Serializable {
     private Double discountPercentage;
     private LocalDateTime discountStartDate;
     private LocalDateTime discountEndDate;
     private Long discountNumberOfMembers;
+    private long courseId;
 }

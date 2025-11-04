@@ -5,16 +5,18 @@ spring:
     name:
       course-service
   data:
+    redis:
+      host: localhost
+      port: 6379
     elasticsearch:
       client:
         elasticsearch:
           uris: http://localhost:9200
       repositories:
         enabled: true
+  main:
+    allow-bean-definition-overriding: true
 
-    redis:
-      host: localhost
-      port: 6379
 
     rabbitmq:
       host: localhost

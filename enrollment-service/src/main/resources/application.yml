@@ -1,20 +1,38 @@
 server:
   port: 8083
+
 spring:
   application:
-    name:
-      enrollment-service
+    name: enrollment-service
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  amqp:
+    deserialization:
+      trusted:
+        packages:
+          - org.example.courseservice
+          - java.time
+
+  main:
+    allow-bean-definition-overriding: true
+
+
 
 stripe:
   key: ${STRIPE_KEY}

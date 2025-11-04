@@ -14,4 +14,5 @@ public class DiscountCacheDTO implements Serializable {
     private LocalDateTime discountStartDate;
     private LocalDateTime discountEndDate;
     private Long discountNumberOfMembers;
+    private long courseId;
 }
