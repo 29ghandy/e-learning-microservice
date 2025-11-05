@@ -17,7 +17,7 @@ import java.util.Optional;
 public class RedisService {
     private final RedisTemplate<String, DiscountCacheDTO> redisTemplate;
 
-    private static final String PREFIX = "discount:";
+    private static final String PREFIX = "discount-enrollment:";
 
     public void saveDiscount(Long courseId, DiscountCacheDTO discount, Duration ttl) {
         String key = PREFIX + courseId;

@@ -14,7 +14,7 @@ public class RedisService {
 
     private final RedisTemplate<String, DiscountCacheDTO> redisTemplate;
 
-    private static final String PREFIX = "discount:";
+    private static final String PREFIX = "discount-course:";
 
     public void saveDiscount(Long courseId, DiscountCacheDTO discount, Duration ttl) {
         String key = PREFIX + courseId;

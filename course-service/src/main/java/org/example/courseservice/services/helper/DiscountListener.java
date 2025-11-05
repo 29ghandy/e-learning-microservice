@@ -8,6 +8,7 @@ import org.example.courseservice.repositories.CourseRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -22,7 +23,7 @@ public class DiscountListener {
     public void handleDiscount(DiscountMessage message) {
         // update cache
         // if members == 0, update database
-        redisService.deleteDiscount(message.courseId);
+
         if (message.discount.getDiscountNumberOfMembers() == 0) {
             courseRepository.findById(message.courseId).ifPresent(course -> {
                 course.setDiscountPercentage(0.0);
@@ -30,7 +31,9 @@ public class DiscountListener {
                 course.setDiscountStartDate(null);
                 course.setDiscountEndDate(null);
                 courseRepository.save(course);
+                redisService.deleteDiscount(message.courseId);
             });
+
             return;
         }
 
@@ -38,5 +41,5 @@ public class DiscountListener {
         redisService.saveDiscount(message.courseId, message.discount, ttl);
     }
 
-    public record DiscountMessage(Long courseId, DiscountCacheDTO discount) {}
+    public record DiscountMessage(Long courseId, DiscountCacheDTO discount) implements Serializable {}
 }

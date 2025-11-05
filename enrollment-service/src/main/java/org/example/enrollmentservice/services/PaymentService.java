@@ -52,22 +52,29 @@ public class PaymentService {
             st.add(enrollment.getCourseId());
         }
         List<CourseInfo> courseIDs = request.getCourseIDs();
+        double total = 0.0;
         for (var item : courseIDs) {
             if(st.contains(item.getId())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("555555 a7a7a isbnoakbdoas");
             }
+            total += item.getPrice();
+            if(!redisService.exists(item.getId())) continue;
             long discountNumberOfMembers = redisService.atomicDecrementMembers(item.getId());
             if (discountNumberOfMembers == -2) {
                 return ResponseEntity.badRequest().body("Payment failed, please try again");
             }
 
             DiscountCacheDTO discountCacheDTO = redisService.getDiscount(item.getId()).orElse(null);
+            if(discountCacheDTO == null) continue;
+            double newPrice = item.getPrice() - item.getPrice() * (discountCacheDTO.getDiscountPercentage() / 100);
+            total -= item.getPrice();
+            total +=  newPrice ;
             discountPublisher.publishDiscount(item.getId(), discountCacheDTO);
         }
 
         Stripe.apiKey = stripeKey;
         Map<String, Object> params = new HashMap<>();
-        long amountInCents = Math.round(request.getTotalPrice() * 100);
+        long amountInCents = Math.round(total * 100);
         params.put("amount", amountInCents);
         params.put("currency", "usd");
         params.put("automatic_payment_methods", Map.of("enabled", true));
@@ -85,16 +92,21 @@ public class PaymentService {
         List<Enrollment> enrollments = new ArrayList<>();
         List<OrderItem> orderItemsIds = new ArrayList<>();
         for (var item : courseIds) {
+            double price = item.getPrice();
+            if(redisService.exists(item.getId())) {
+                DiscountCacheDTO discountCacheDTO = redisService.getDiscount(item.getId()).orElse(null);
+                price = price - price * (discountCacheDTO.getDiscountPercentage() / 100.0);
+            }
             OrderItem orderItem = new OrderItem();
             orderItem.setCourseId(item.getId());
-            orderItem.setPrice(item.getPrice());
+            orderItem.setPrice(price);
             orderItem.setOrder(foundOrder);
             orderItemsIds.add(orderItem);
 
             Enrollment enrollment = new Enrollment();
             enrollment.setStudentId(request.getStudentId());
             enrollment.setCourseId(item.getId());
-            enrollment.setPrice(item.getPrice());
+            enrollment.setPrice(price);
             enrollment.setPaymentDate(LocalDate.now());
             enrollment.setOrder(foundOrder);
             enrollments.add(enrollment);
