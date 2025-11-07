@@ -1,0 +1,51 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: chat-service
+
+  # ? MongoDB Configuration
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: chat_db
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 60000
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 5
+          min-idle: 1
+
+
+
+  # ? Elasticsearch Configuration (for searching users/messages)
+  elasticsearch:
+    uris: http://localhost:9200
+    username: elastic
+    password: changeme  # ?? Change this if you have auth enabled
+    connection-timeout: 10s
+    socket-timeout: 60s
+
+# ? WebSocket endpoint
+websocket:
+  endpoint: /ws/chat
+  allowed-origins: "*"
+
+# ? Logging
+logging:
+  level:
+    org.springframework.web: INFO
+    org.springframework.data.mongodb: INFO
+    org.springframework.data.redis: INFO
+    org.springframework.data.elasticsearch: INFO
+  pattern:
+    console: "%clr(%d{HH:mm:ss}){blue} %clr(%-5level){green} %clr(%logger{36}){yellow} - %msg%n"
+
+
+chat:
+  message-cache-limit: 100
