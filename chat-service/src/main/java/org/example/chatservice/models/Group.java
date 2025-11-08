@@ -1,16 +1,20 @@
 package org.example.chatservice.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Document("groups")
-@RequiredArgsConstructor
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Group {
 
     @Id
@@ -19,4 +23,5 @@ public class Group {
     private long numberOfMembers;
     private long teacherId;
     private List<Member> members;
+    private LocalDateTime createdAt;
 }

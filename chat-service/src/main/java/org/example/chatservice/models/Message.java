@@ -18,8 +18,7 @@ public class Message {
     private String text;
     private String userId;
     private String username;
-    private String path;
-
+    private String groupId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
