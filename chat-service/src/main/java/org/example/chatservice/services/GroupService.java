@@ -2,10 +2,14 @@ package org.example.chatservice.services;
 
 import lombok.RequiredArgsConstructor;
 import org.example.chatservice.models.Group;
+import org.example.chatservice.models.Member;
 import org.example.chatservice.models.Message;
 import org.example.chatservice.repositories.GroupRepository;
+import org.example.chatservice.repositories.MemberRepository;
 import org.example.chatservice.repositories.MessageRepository;
-import org.example.chatservice.requestBodies.GroupRequest;
+import org.example.chatservice.requestBodies.CreateGroupRequest;
+import org.example.chatservice.requestBodies.JoinGroupRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +24,7 @@ public class GroupService {
 
     private final GroupRepository groupRepository;
     private final MessageRepository messageRepository;
+    private final MemberRepository memberRepository;
     private final RedisService redisService;
 
     public Group getGroup(String groupId) {
@@ -41,12 +46,31 @@ public class GroupService {
                 .collect(Collectors.toList());
     }
 
-    public ResponseEntity<Group> createGroup(GroupRequest request) {
+    public ResponseEntity<Group> createGroup(CreateGroupRequest request) {
         Group group = new Group();
         group.setTitle(request.getTitle());
         group.setTeacherId(request.getTeacherId());
         group.setCreatedAt(LocalDateTime.now());
         groupRepository.save(group);
+        return ResponseEntity.status(HttpStatus.CREATED).body(group);
+    }
+
+    public ResponseEntity<?> joinGroup(JoinGroupRequest request) {
+        Group group = groupRepository.findById(request.getGroupId()).orElse(null);
+        if (group == null) {
+            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
+        }
+
+        Member member = new Member();
+        member.setUsername(request.getUsername());
+        member.setUserId(request.getNewMemberId());
+        member.setGroupId(group.getId());
+        member.setJoinedAt(LocalDateTime.now());
+        memberRepository.save(member);
+
+        group.getMembers().add(member);
+        groupRepository.save(group);
+
         return ResponseEntity.ok(group);
     }
 }

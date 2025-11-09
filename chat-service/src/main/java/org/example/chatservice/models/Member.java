@@ -15,6 +15,7 @@ public class Member {
     @Id
     private String id;
 
+    private Long userId;
     private String username;
     private String type;
     private LocalDateTime joinedAt;

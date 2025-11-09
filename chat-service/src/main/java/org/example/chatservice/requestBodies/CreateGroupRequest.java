@@ -1,10 +1,9 @@
 package org.example.chatservice.requestBodies;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 @Data
-public class GroupRequest {
+public class CreateGroupRequest {
     private String title;
     private Long teacherId;
 

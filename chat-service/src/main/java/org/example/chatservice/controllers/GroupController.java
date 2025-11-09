@@ -3,7 +3,8 @@ package org.example.chatservice.controllers;
 import lombok.RequiredArgsConstructor;
 import org.example.chatservice.models.Group;
 import org.example.chatservice.models.Message;
-import org.example.chatservice.requestBodies.GroupRequest;
+import org.example.chatservice.requestBodies.CreateGroupRequest;
+import org.example.chatservice.requestBodies.JoinGroupRequest;
 import org.example.chatservice.services.GroupService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,13 +29,24 @@ public class GroupController {
             @RequestParam(defaultValue = "100") int limit) {
         return ResponseEntity.ok(groupService.getGroupMessages(groupId, limit));
     }
+
     @PostMapping("/create-group")
-    public ResponseEntity<Group> createGroup(@RequestBody GroupRequest requestBody) {
+    public ResponseEntity<Group> createGroup(@RequestBody CreateGroupRequest requestBody) {
          try {
              return groupService.createGroup(requestBody);
          }
          catch (Exception e) {
              return ResponseEntity.badRequest().build();
          }
+    }
+
+    @PostMapping("join-group")
+    public ResponseEntity<?> joinGroup(@RequestBody JoinGroupRequest request) {
+        try {
+            return groupService.joinGroup(request);
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

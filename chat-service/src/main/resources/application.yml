@@ -29,14 +29,3 @@ spring:
 websocket:
   endpoint: /ws
   allowed-origins: "*"
-
-# Logging
-logging:
-  level:
-    org.springframework.web: DEBUG
-    org.springframework.web.socket: DEBUG
-    org.springframework.messaging: DEBUG
-    org.springframework.data.mongodb: INFO
-    org.springframework.data.redis: INFO
-  pattern:
-    console: "%clr(%d{HH:mm:ss}){blue} %clr(%-5level){green} %clr(%logger{36}){yellow} - %msg%n"

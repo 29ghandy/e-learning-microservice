@@ -3,7 +3,11 @@ package org.example.chatservice.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.chatservice.dtos.MessageResponse;
+import org.example.chatservice.models.Group;
+import org.example.chatservice.models.Member;
 import org.example.chatservice.models.Message;
+import org.example.chatservice.repositories.GroupRepository;
+import org.example.chatservice.repositories.MemberRepository;
 import org.example.chatservice.repositories.MessageRepository;
 import org.example.chatservice.requestBodies.MessageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,37 +25,47 @@ import java.util.UUID;
 @Slf4j
 public class MessageService {
 
-     private final MessageRepository messageRepository;
-     private final RedisService redisService;
+    private final GroupRepository groupRepository;
+    private final MemberRepository memberRepository;
+    private final RedisService redisService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    void sendMessage(MessageRequest request,String groupId) {
-         log.info("Received message for group {}: {}", groupId, request.getText());
+    public void sendMessage(MessageRequest request, String groupId) {
+        log.info("Received message for group {}: {}", groupId, request.getText());
 
-         // Create message entity
-         Message message = Message.builder()
-                 .id(UUID.randomUUID().toString())
-                 .text(request.getText())
-                 .userId(request.getUserId())
-                 .username(request.getUsername())
-                 .groupId(groupId)
-                 .createdAt(LocalDateTime.now())
-                 .updatedAt(LocalDateTime.now())
-                 .build();
+        Member member = memberRepository.findByUserIdAndGroupId(request.getUserId(), groupId);
+        if (member == null) {
+            System.out.println("Member not found");
+            return;
+        }
 
-         // Add to cache
-         redisService.addMessage(groupId, message);
+        // Create message entity
+        Message message = Message.builder()
+                .id(UUID.randomUUID().toString())
+                .text(request.getText())
+                .userId(request.getUserId())
+                .username(request.getUsername())
+                .groupId(groupId)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
 
-         // Broadcast to all subscribers of this group
-         MessageResponse response = MessageResponse.builder()
-                 .id(message.getId())
-                 .text(message.getText())
-                 .userId(message.getUserId())
-                 .username(message.getUsername())
-                 .groupId(message.getGroupId())
-                 .createdAt(message.getCreatedAt())
-                 .build();
+        // Add to cache
+        redisService.addMessage(groupId, message);
+        System.out.println("added to cache " + message);
 
-         messagingTemplate.convertAndSend("/topic/group/" + groupId, response);
-     }
+        // Broadcast to all subscribers of this group
+        MessageResponse response = MessageResponse.builder()
+                .id(message.getId())
+                .text(message.getText())
+                .userId(message.getUserId())
+                .username(message.getUsername())
+                .groupId(message.getGroupId())
+                .createdAt(message.getCreatedAt())
+                .build();
+
+        messagingTemplate.convertAndSend("/topic/group/" + groupId, response);
+
+        System.out.println("Sent message for group " + groupId + " with text " + request.getText());
+    }
 }

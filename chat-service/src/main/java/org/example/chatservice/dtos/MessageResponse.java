@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class MessageResponse {
     private String id;
     private String text;
-    private String userId;
+    private Long userId;
     private String username;
     private String groupId;
     private LocalDateTime createdAt;

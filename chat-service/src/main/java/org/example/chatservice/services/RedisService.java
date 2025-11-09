@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class RedisService {
 
-    @Value("${chat.message-cache-limit:100}")
+    @Value("${chat.message-cache-limit:5}")
     private int cacheLimit;
 
     private final RedisTemplate<String, Object> redisTemplate;

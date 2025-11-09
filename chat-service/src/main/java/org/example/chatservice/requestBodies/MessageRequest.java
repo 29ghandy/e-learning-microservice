@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class MessageRequest {
     private String text;
-    private String userId;
+    private Long userId;
     private String username;
 }
