@@ -21,8 +21,8 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, DiscountCacheDTO> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, DiscountCacheDTO> template = new RedisTemplate<>();
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
 
         // Configure ObjectMapper for proper LocalDateTime support
@@ -33,7 +33,7 @@ public class RedisConfig {
         // Use the custom ObjectMapper inside the serializer
         GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(mapper);
 
-        // Set key/value serializers
+
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(serializer);
         template.setHashKeySerializer(new StringRedisSerializer());

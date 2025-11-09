@@ -129,4 +129,7 @@ public class CourseService {
     public List<CourseIndex> findByNameContainingIgnoreCase(String name){
         return courseSearchRepository.findByNameContainingIgnoreCase(name);
     }
+    public void rateCourse() {
+
+    }
 }

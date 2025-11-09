@@ -31,7 +31,6 @@ public class SectionService {
         Section section = new Section();
         section.setCourse(course.get());
         section.setNumber(request.getSectionNumber());
-        section.setNumberOfHours(request.getSectionNumberOfHours());
         section.setTitle(request.getSectionTitle());
 
         sectionRepository.save(section);
@@ -48,9 +47,7 @@ public class SectionService {
         if (request.getSectionNumber() != null) {
             sec.setNumber(request.getSectionNumber());
         }
-        if (request.getSectionNumberOfHours() != null) {
-            sec.setNumberOfHours(request.getSectionNumberOfHours());
-        }
+
         if (request.getSectionTitle() != null) {
             sec.setTitle(request.getSectionTitle());
         }

@@ -1,37 +1,56 @@
 package org.example.courseservice.services.helper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.courseservice.dtos.DiscountCacheDTO;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class RedisService {
 
-    private final RedisTemplate<String, DiscountCacheDTO> redisTemplate;
-
-    private static final String PREFIX = "discount-course:";
-
+    private final RedisTemplate<String, Object> discountCache;
+    private final RedisTemplate<String, Object> paymentCache;
+    private  final ObjectMapper mapper = new ObjectMapper();
+    private static final String DISCOUNT_COURSE = "discount-course:";
+    private static final String PAYMENT_PREFIX = "payment:";
     public void saveDiscount(Long courseId, DiscountCacheDTO discount, Duration ttl) {
-        String key = PREFIX + courseId;
-        redisTemplate.opsForValue().set(key, discount, ttl);
+        String key = DISCOUNT_COURSE + courseId;
+        discountCache.opsForValue().set(key, discount, ttl);
     }
-
+    public void savePayment(Long studentId, List<Long> courses) {
+        String key = PAYMENT_PREFIX + studentId;
+        List<Long> coursesIds = mapper.convertValue(paymentCache.opsForValue().get(key),List.class);
+        if (coursesIds ==  null)  coursesIds = new ArrayList<>();
+        coursesIds.addAll(courses);
+        paymentCache.opsForValue().set(key, coursesIds);
+    }
     public Optional<DiscountCacheDTO> getDiscount(Long courseId) {
-        String key = PREFIX + courseId;
-        DiscountCacheDTO discount = redisTemplate.opsForValue().get(key);
+        String key = DISCOUNT_COURSE + courseId;
+        DiscountCacheDTO discount = mapper.convertValue(discountCache.opsForValue().get(key), DiscountCacheDTO.class);
         return Optional.ofNullable(discount);
     }
 
     public void deleteDiscount(Long courseId) {
-        redisTemplate.delete(PREFIX + courseId);
+        discountCache.delete(DISCOUNT_COURSE + courseId);
     }
 
-    public boolean exists(Long courseId) {
-        return Boolean.TRUE.equals(redisTemplate.hasKey(PREFIX + courseId));
+    public boolean courseExists(Long courseId) {
+        return Boolean.TRUE.equals(discountCache.hasKey(DISCOUNT_COURSE + courseId));
+    }
+    public boolean paymentExists(Long studentId, Long courseId) {
+        String key = PAYMENT_PREFIX + studentId;
+        if(paymentCache.hasKey(key))
+        {
+              List<Long> courses = mapper.convertValue(paymentCache.opsForValue().get(key,0,-1),List.class);
+              return courses.contains(courseId);
+        }
+        return false;
     }
 }

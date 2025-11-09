@@ -19,6 +19,7 @@ import org.example.enrollmentservice.repostories.OrderRepository;
 import org.example.enrollmentservice.requestBodies.CourseInfo;
 import org.example.enrollmentservice.requestBodies.EnrollmentRequestBody;
 import org.example.enrollmentservice.services.helper.DiscountPublisher;
+import org.example.enrollmentservice.services.helper.PaymentPublisher;
 import org.example.enrollmentservice.services.helper.RedisService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -39,7 +40,7 @@ public class PaymentService {
     private final OrderItemsRepository orderItemsRepository;
     private final RedisService redisService;
     private final DiscountPublisher discountPublisher;
-
+   private final PaymentPublisher paymentPublisher;
     @Transactional
     public ResponseEntity<?> payCourses(EnrollmentRequestBody request) throws StripeException {
         // loop through list of courseIds
@@ -91,6 +92,7 @@ public class PaymentService {
         List<CourseInfo> courseIds = request.getCourseIDs();
         List<Enrollment> enrollments = new ArrayList<>();
         List<OrderItem> orderItemsIds = new ArrayList<>();
+        List<Long> courses = new ArrayList<>();
         for (var item : courseIds) {
             double price = item.getPrice();
             if(redisService.exists(item.getId())) {
@@ -110,9 +112,13 @@ public class PaymentService {
             enrollment.setPaymentDate(LocalDate.now());
             enrollment.setOrder(foundOrder);
             enrollments.add(enrollment);
+            courses.add(item.getId());
         }
         orderItemsRepository.saveAll(orderItemsIds);
         enrollmentRepository.saveAll(enrollments);
+        if(!courses.isEmpty()) {
+            paymentPublisher.publishPayment(request.getStudentId(), courses);
+        }
         return ResponseEntity.ok().body(response);
     }
 

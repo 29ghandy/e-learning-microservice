@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class RedisService {
 
-    @Value("${chat.message-cache-limit:5}")
-    private int cacheLimit;
+
+    private final int cacheLimit = 5;
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final MessageRepository messageRepository;
@@ -63,12 +63,11 @@ public class RedisService {
             if (cachedObjects == null || cachedObjects.isEmpty()) {
                 return;
             }
-
             List<Message> messages = new ArrayList<>();
             for (Object obj : cachedObjects) {
-                if (obj instanceof Message) {
-                    messages.add((Message) obj);
-                }
+
+                    messages.add(objectMapper.convertValue( obj, Message.class));
+
             }
 
             if (!messages.isEmpty()) {
@@ -93,9 +92,8 @@ public class RedisService {
 
             if (cachedObjects != null) {
                 for (Object obj : cachedObjects) {
-                    if (obj instanceof Message) {
-                        messages.add((Message) obj);
-                    }
+                        messages.add(objectMapper.convertValue( obj, Message.class));
+
                 }
             }
         } catch (Exception e) {

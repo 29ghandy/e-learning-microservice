@@ -24,7 +24,6 @@ public class Section {
     private Course course;
 
     private Integer number;
-    private Integer numberOfHours;
     private String title;
 
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

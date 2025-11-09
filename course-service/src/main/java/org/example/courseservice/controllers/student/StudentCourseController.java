@@ -1,12 +1,15 @@
 package org.example.courseservice.controllers.student;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.courseservice.indexies.CourseIndex;
 import org.example.courseservice.models.Course;
+import org.example.courseservice.requestBodies.StreamCourseRequest;
 import org.example.courseservice.services.CourseService;
 import org.example.courseservice.services.FileService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
@@ -37,6 +40,20 @@ public class StudentCourseController {
         }
         catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @GetMapping("/stream-video")
+    public ResponseEntity<?> streamVideo(@RequestBody @Valid StreamCourseRequest requestBody, BindingResult bindingResult)  {
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+        }
+        try {
+
+            return fileService.streamVideo(requestBody);
+        }
+        catch (Exception e)
+        {
+             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

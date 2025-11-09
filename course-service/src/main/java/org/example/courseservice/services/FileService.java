@@ -5,8 +5,11 @@ import org.example.courseservice.models.Section;
 import org.example.courseservice.models.SectionFile;
 import org.example.courseservice.repositories.SectionFileRepository;
 import org.example.courseservice.repositories.SectionRepository;
+import org.example.courseservice.requestBodies.StreamCourseRequest;
 import org.example.courseservice.requestBodies.UploadFileRequest;
+import org.example.courseservice.services.helper.RedisService;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -34,7 +37,7 @@ public class FileService {
     private final String FINAL_DIR = BASE_DIR + "/final";
     private final SectionRepository sectionRepository;
     private final SectionFileRepository sectionFileRepository;
-
+    private final RedisService redisService;
     public ResponseEntity<?> addFile(UploadFileRequest request) throws IOException {
         MultipartFile file = request.getFile();
 
@@ -145,4 +148,75 @@ public class FileService {
                 .body(resource);
     }
 
+    public ResponseEntity<?> streamVideo(StreamCourseRequest request) throws IOException {
+
+        if(!redisService.paymentExists(request.getStudentId(),request.getCourseId()))
+        {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed on this course");
+        }
+        SectionFile file = sectionFileRepository.findById(request.getFileId()).orElseThrow(() -> new FileNotFoundException("File not found"));
+        File videoFile = new File("uploads/final" + file.getName());
+        if (!videoFile.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        long fileLength = videoFile.length();
+        Resource videoResource = new FileSystemResource(videoFile);
+
+
+        long start = 0;
+        long end = fileLength - 1;
+        String rangeHeader = request.getRange();
+
+        if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {
+            String[] ranges = rangeHeader.substring(6).split("-");
+            start = Long.parseLong(ranges[0]);
+            if (ranges.length > 1 && !ranges[1].isEmpty()) {
+                end = Long.parseLong(ranges[1]);
+            }
+        }
+
+        long contentLength = end - start + 1;
+
+        InputStream inputStream = new FileInputStream(videoFile);
+        inputStream.skip(start);
+        InputStreamResource inputStreamResource = new InputStreamResource(
+                new LimitedInputStream(inputStream, contentLength)
+        );
+
+        return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+                .header(HttpHeaders.CONTENT_TYPE, "video/mp4")
+                .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength))
+                .header(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileLength)
+                .body(inputStreamResource);
+    }
+
+    // Helper class to stream only part of the file
+    private static class LimitedInputStream extends InputStream {
+        private final InputStream source;
+        private long remaining;
+
+        public LimitedInputStream(InputStream source, long limit) {
+            this.source = source;
+            this.remaining = limit;
+        }
+
+        @Override
+        public int read() throws IOException {
+            if (remaining <= 0) return -1;
+            int result = source.read();
+            if (result != -1) remaining--;
+            return result;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            if (remaining <= 0) return -1;
+            len = (int) Math.min(len, remaining);
+            int result = source.read(b, off, len);
+            if (result != -1) remaining -= result;
+            return result;
+        }
+    }
 }
