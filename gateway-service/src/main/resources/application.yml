@@ -1,0 +1,52 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        # User service - accessible to everyone with a valid JWT
+        - id: user-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/user/**
+
+
+        # Course service: teacher endpoints
+        - id: course-service-teacher
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/course/teacher/**
+          filters:
+            - name: RoleFilter
+              args:
+                allowedRoles: TEACHER,ADMIN,SUPER_ADMIN
+
+        # Course service: student endpoints
+        - id: course-service-student
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/course/student/**
+          filters:
+            - name: RoleFilter
+              args:
+                allowedRoles: TEACHER,STUDENT,ADMIN,SUPER_ADMIN
+
+        # Chat service: both teacher and student
+        - id: chat
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/chat/**
+          filters:
+            - name: RoleFilter
+              args:
+                allowedRoles: TEACHER,STUDENT,ADMIN,SUPER_ADMIN
+
+        # Enrollment service: admin and teacher
+        - id: enrollment
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/enrollment/**
+          filters:
+            - name: RoleFilter
+              args:
+                allowedRoles: ADMIN,TEACHER,SUPER_ADMIN
+jwt:
+  secret: ${JWT_SECRET_KEY}

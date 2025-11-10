@@ -8,13 +8,16 @@ import org.example.courseservice.requestBodies.StreamCourseRequest;
 import org.example.courseservice.services.CourseService;
 import org.example.courseservice.services.FileService;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/course/student")
@@ -43,17 +46,20 @@ public class StudentCourseController {
         }
     }
     @GetMapping("/stream-video")
-    public ResponseEntity<?> streamVideo(@RequestBody @Valid StreamCourseRequest requestBody, BindingResult bindingResult)  {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
-        }
-        try {
+    public ResponseEntity<?> streamVideo  (  @RequestParam Long studentId,
+    @RequestParam Long courseId,
+    @RequestParam Long fileId,
+    @RequestHeader(value = "Range", required = false) String range)  {
 
+        try {
+            StreamCourseRequest requestBody = new StreamCourseRequest(studentId,courseId,fileId,range);
             return fileService.streamVideo(requestBody);
         }
         catch (Exception e)
         {
-             return ResponseEntity.badRequest().body(e.getMessage());
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(error);
         }
     }
 }

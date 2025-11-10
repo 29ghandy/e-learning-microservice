@@ -155,7 +155,7 @@ public class FileService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed on this course");
         }
         SectionFile file = sectionFileRepository.findById(request.getFileId()).orElseThrow(() -> new FileNotFoundException("File not found"));
-        File videoFile = new File("uploads/final" + file.getName());
+        File videoFile = new File("uploads/final/" + file.getName());
         if (!videoFile.exists()) {
             return ResponseEntity.notFound().build();
         }
