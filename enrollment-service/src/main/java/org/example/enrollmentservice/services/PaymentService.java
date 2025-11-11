@@ -41,8 +41,9 @@ public class PaymentService {
     private final OrderItemsRepository orderItemsRepository;
     private final RedisService redisService;
     private final DiscountPublisher discountPublisher;
-   private final PaymentPublisher paymentPublisher;
-   private final EmailPublisher emailPublisher;
+    private final PaymentPublisher paymentPublisher;
+    private final EmailPublisher emailPublisher;
+
     @Transactional
     public ResponseEntity<?> payCourses(EnrollmentRequestBody request) throws StripeException {
         // loop through list of courseIds
@@ -51,27 +52,27 @@ public class PaymentService {
 
         List<Enrollment> enrollmen = enrollmentRepository.findAllByStudentId(request.getStudentId());
         HashSet<Long> st = new HashSet<>();
-        for(Enrollment enrollment : enrollmen) {
+        for (Enrollment enrollment : enrollmen) {
             st.add(enrollment.getCourseId());
         }
         List<CourseInfo> courseIDs = request.getCourseIDs();
         double total = 0.0;
         for (var item : courseIDs) {
-            if(st.contains(item.getId())) {
+            if (st.contains(item.getId())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("555555 a7a7a isbnoakbdoas");
             }
             total += item.getPrice();
-            if(!redisService.exists(item.getId())) continue;
+            if (!redisService.exists(item.getId())) continue;
             long discountNumberOfMembers = redisService.atomicDecrementMembers(item.getId());
             if (discountNumberOfMembers == -2) {
                 return ResponseEntity.badRequest().body("Payment failed, please try again");
             }
 
             DiscountCacheDTO discountCacheDTO = redisService.getDiscount(item.getId()).orElse(null);
-            if(discountCacheDTO == null) continue;
+            if (discountCacheDTO == null) continue;
             double newPrice = item.getPrice() - item.getPrice() * (discountCacheDTO.getDiscountPercentage() / 100);
             total -= item.getPrice();
-            total +=  newPrice ;
+            total += newPrice;
             discountPublisher.publishDiscount(item.getId(), discountCacheDTO);
         }
 
@@ -97,7 +98,7 @@ public class PaymentService {
         List<Long> courses = new ArrayList<>();
         for (var item : courseIds) {
             double price = item.getPrice();
-            if(redisService.exists(item.getId())) {
+            if (redisService.exists(item.getId())) {
                 DiscountCacheDTO discountCacheDTO = redisService.getDiscount(item.getId()).orElse(null);
                 price = price - price * (discountCacheDTO.getDiscountPercentage() / 100.0);
             }
@@ -118,10 +119,10 @@ public class PaymentService {
         }
         orderItemsRepository.saveAll(orderItemsIds);
         enrollmentRepository.saveAll(enrollments);
-        if(!courses.isEmpty()) {
+        if (!courses.isEmpty()) {
             paymentPublisher.publishPayment(request.getStudentId(), courses);
 
-            emailPublisher.publishEmail(request.getStudentId(),courses);
+            emailPublisher.publishEmail(request.getStudentId(), courses);
         }
         return ResponseEntity.ok().body(response);
     }

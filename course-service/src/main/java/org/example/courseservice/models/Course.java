@@ -21,6 +21,7 @@ public class Course {
     private Long id;
     private String name;
     private Long teacherId;
+    private String teacherName;
     private Double price;
     private String thumbnailPath;
     private String category;

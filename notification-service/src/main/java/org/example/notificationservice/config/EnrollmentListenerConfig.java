@@ -1,4 +1,4 @@
-package org.example.enrollmentservice.config;
+package org.example.notificationservice.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class EmailPublisherConfig {
+public class EnrollmentListenerConfig {
     public static final String EXCHANGE_NAME = "email.payment.exchange";
     public static final String ROUTING_KEY = "email.payment.send";
     public static final String QUEUE_NAME = "email.payment.queue";

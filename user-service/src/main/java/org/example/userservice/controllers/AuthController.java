@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.models.Users;
+import org.example.userservice.repositories.UserRepository;
 import org.example.userservice.requestBodies.HashPasswordRequest;
 import org.example.userservice.requestBodies.LoginRequest;
 import org.example.userservice.requestBodies.SignUpRequest;
@@ -14,13 +15,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class AuthController {
-    private final AuthService authService ;
+    private final AuthService authService;
+    private final UserRepository userRepository;
+
     @PostMapping("/signup")
     public ResponseEntity<?> signup( @ModelAttribute @Valid SignUpRequest requestBody, BindingResult bindingResult) throws Exception {
        if (bindingResult.hasErrors()) {
@@ -69,5 +73,10 @@ public class AuthController {
     @GetMapping("hash-password")
     public String hash(@RequestBody HashPasswordRequest request) {
         return authService.hash(request);
+    }
+
+    @PostMapping("users/emails")
+    public List<String> getEmailsByIds(@RequestBody List<Long> userIds) {
+        return userRepository.findEmailsByIdIn(userIds);
     }
 }

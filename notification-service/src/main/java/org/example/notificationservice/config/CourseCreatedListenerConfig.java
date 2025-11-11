@@ -1,9 +1,6 @@
-package org.example.enrollmentservice.config;
+package org.example.notificationservice.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -12,15 +9,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class EmailPublisherConfig {
-    public static final String EXCHANGE_NAME = "email.payment.exchange";
-    public static final String ROUTING_KEY = "email.payment.send";
-    public static final String QUEUE_NAME = "email.payment.queue";
+public class CourseCreatedListenerConfig {
+
+    public static final String EXCHANGE_NAME = "course.announcement.exchange";
+    public static final String ROUTING_KEY = "course.created.announcement";
+    public static final String QUEUE_NAME = "course.created.update.queue";
 
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
+
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter jsonMessageConverter) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
@@ -29,18 +28,18 @@ public class EmailPublisherConfig {
     }
 
     @Bean
-    public TopicExchange emailExchange() {
+    public TopicExchange announcementExchange() {
         return new TopicExchange(EXCHANGE_NAME);
     }
 
     @Bean
-    public Queue emailQueue() {
+    public Queue courseCreatedUpdateQueue() {
         return new Queue(QUEUE_NAME, true);
     }
 
     @Bean
-    public Binding enrollmentToNotificationBinding(Queue emailQueue, TopicExchange emailExchange) {
-        return BindingBuilder.bind(emailQueue).to(emailExchange).with(ROUTING_KEY);
+    public Binding courseToNotificationBinding(Queue courseCreatedUpdateQueue, TopicExchange announcementExchange) {
+        return BindingBuilder.bind(courseCreatedUpdateQueue).to(announcementExchange).with(ROUTING_KEY);
     }
 
 }

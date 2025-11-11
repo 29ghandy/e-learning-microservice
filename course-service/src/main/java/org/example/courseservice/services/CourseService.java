@@ -1,6 +1,7 @@
 package org.example.courseservice.services;
 
 import lombok.RequiredArgsConstructor;
+import org.example.courseservice.dtos.CourseCreatedDTO;
 import org.example.courseservice.dtos.DiscountCacheDTO;
 import org.example.courseservice.indexies.CourseIndex;
 import org.example.courseservice.models.Course;
@@ -10,10 +11,7 @@ import org.example.courseservice.requestBodies.CreateCourseRequest;
 import org.example.courseservice.requestBodies.CreateDiscountRequest;
 import org.example.courseservice.requestBodies.DeleteCourseRequest;
 import org.example.courseservice.requestBodies.UpdateCourseRequest;
-import org.example.courseservice.services.helper.CourseSyncService;
-import org.example.courseservice.services.helper.DiscountPublisher;
-import org.example.courseservice.services.helper.ImageSaver;
-import org.example.courseservice.services.helper.RedisService;
+import org.example.courseservice.services.helper.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -32,6 +30,7 @@ public class CourseService {
     private final CourseSyncService courseSyncService;
     private final RedisService redisService;
     private final DiscountPublisher discountPublisher;
+    private final CoursePublisher coursePublisher;
 
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
@@ -55,8 +54,18 @@ public class CourseService {
         course.setDiscountStartDate(LocalDateTime.now());
         course.setDiscountEndDate(LocalDateTime.now().plusDays(1));
         course.setDescription(request.getCourseDescription());
+
         courseRepository.save(course);
         courseSyncService.indexCourse(course);
+
+        CourseCreatedDTO courseCreatedDTO = new CourseCreatedDTO();
+        courseCreatedDTO.setTeacherId(request.getTeacherId());
+        courseCreatedDTO.setCourseName(request.getCourseName());
+        courseCreatedDTO.setDescription(request.getCourseDescription());
+        courseCreatedDTO.setPrice(request.getCoursePrice());
+        courseCreatedDTO.setTeacherName(request.getTeacherName());
+        coursePublisher.publishCourse(courseCreatedDTO);
+
         return course;
     }
 
@@ -129,7 +138,7 @@ public class CourseService {
     public List<CourseIndex> findByNameContainingIgnoreCase(String name){
         return courseSearchRepository.findByNameContainingIgnoreCase(name);
     }
-    public ResponseEntity<?> rateCourse() {
-
-    }
+//    public ResponseEntity<?> rateCourse() {
+//
+//    }
 }

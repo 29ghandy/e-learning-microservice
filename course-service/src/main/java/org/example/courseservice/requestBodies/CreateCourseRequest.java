@@ -27,6 +27,7 @@ public class CreateCourseRequest {
    @Min(value = 1, message = "Number of hours must be at least 1")
    private Integer numberOfHours;
    private long teacherId;
+   private String teacherName;
    private String role;
    private MultipartFile thumbnail;
 }
