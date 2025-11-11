@@ -10,6 +10,7 @@ import org.example.courseservice.services.FileService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +53,8 @@ public class StudentCourseController {
     @RequestHeader(value = "Range", required = false) String range)  {
 
         try {
-            StreamCourseRequest requestBody = new StreamCourseRequest(studentId,courseId,fileId,range);
+
+            StreamCourseRequest requestBody = new StreamCourseRequest(courseId,fileId,studentId,range);
             return fileService.streamVideo(requestBody);
         }
         catch (Exception e)

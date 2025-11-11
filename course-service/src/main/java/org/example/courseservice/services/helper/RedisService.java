@@ -1,5 +1,6 @@
 package org.example.courseservice.services.helper;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.courseservice.dtos.DiscountCacheDTO;
@@ -48,8 +49,17 @@ public class RedisService {
         String key = PAYMENT_PREFIX + studentId;
         if(paymentCache.hasKey(key))
         {
-              List<Long> courses = mapper.convertValue(paymentCache.opsForValue().get(key,0,-1),List.class);
-              return courses.contains(courseId);
+            try {
+
+                String json = paymentCache.opsForValue().get(key, 0, -1);
+
+                List<Long> courses = mapper.readValue(json, new TypeReference<List<Long>>() {});
+
+                return courses.contains(courseId);
+            } catch (Exception e) {
+                e.printStackTrace(); // optional: log it properly
+                return false;
+            }
         }
         return false;
     }

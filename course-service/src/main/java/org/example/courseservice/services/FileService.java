@@ -1,5 +1,6 @@
 package org.example.courseservice.services;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.courseservice.models.Section;
 import org.example.courseservice.models.SectionFile;
@@ -16,16 +17,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -148,20 +148,23 @@ public class FileService {
                 .body(resource);
     }
 
-    public ResponseEntity<?> streamVideo(StreamCourseRequest request) throws IOException {
+    public ResponseEntity<?> streamVideo( StreamCourseRequest request) throws IOException {
 
-        if(!redisService.paymentExists(request.getStudentId(),request.getCourseId()))
+        long studentId = request.getStudentId();
+        long courseId = request.getCourseId();
+        if(!redisService.paymentExists(studentId,courseId))
         {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed on this course");
         }
         SectionFile file = sectionFileRepository.findById(request.getFileId()).orElseThrow(() -> new FileNotFoundException("File not found"));
-        File videoFile = new File("uploads/final/" + file.getName());
-        if (!videoFile.exists()) {
-            return ResponseEntity.notFound().build();
-        }
+        String filePrefix = String.format("course%d_section%d_", courseId, file.getSection().getId());
+        String tmp = file.getName().replaceAll("[^a-zA-Z0-9._-]","_");
+        String fileName =  filePrefix + tmp;
+
+        File videoFile = new File(file.getPath());
 
         long fileLength = videoFile.length();
-        Resource videoResource = new FileSystemResource(videoFile);
+
 
 
         long start = 0;

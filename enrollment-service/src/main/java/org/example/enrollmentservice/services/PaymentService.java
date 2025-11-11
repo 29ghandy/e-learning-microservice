@@ -19,6 +19,7 @@ import org.example.enrollmentservice.repostories.OrderRepository;
 import org.example.enrollmentservice.requestBodies.CourseInfo;
 import org.example.enrollmentservice.requestBodies.EnrollmentRequestBody;
 import org.example.enrollmentservice.services.helper.DiscountPublisher;
+import org.example.enrollmentservice.services.helper.EmailPublisher;
 import org.example.enrollmentservice.services.helper.PaymentPublisher;
 import org.example.enrollmentservice.services.helper.RedisService;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +42,7 @@ public class PaymentService {
     private final RedisService redisService;
     private final DiscountPublisher discountPublisher;
    private final PaymentPublisher paymentPublisher;
+   private final EmailPublisher emailPublisher;
     @Transactional
     public ResponseEntity<?> payCourses(EnrollmentRequestBody request) throws StripeException {
         // loop through list of courseIds
@@ -118,6 +120,8 @@ public class PaymentService {
         enrollmentRepository.saveAll(enrollments);
         if(!courses.isEmpty()) {
             paymentPublisher.publishPayment(request.getStudentId(), courses);
+
+            emailPublisher.publishEmail(request.getStudentId(),courses);
         }
         return ResponseEntity.ok().body(response);
     }
