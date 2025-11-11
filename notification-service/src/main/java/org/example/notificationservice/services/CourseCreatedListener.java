@@ -27,8 +27,8 @@ public class CourseCreatedListener {
         //students who bought teacher’s previous courses
         List<Long> studentIds = enrollmentClient.getStudentsByTeacher(teacherId, courseIds);
 
-        List<String> emails = userClient.getEmailsByIds(studentIds);
-
-        emailService.sendAnnouncementEmails(emails, course);
+//        List<String> emails = userClient.getEmailsByIds(studentIds);
+//
+//        emailService.sendAnnouncementEmails(emails, course);
     }
 }

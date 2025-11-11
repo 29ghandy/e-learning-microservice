@@ -47,6 +47,6 @@ spring:
           filters:
             - name: RoleFilter
               args:
-                allowedRoles: ADMIN,TEACHER,SUPER_ADMIN
+                allowedRoles: ADMIN,SUPER_ADMIN,STUDENT,TEACHER
 jwt:
   secret: ${JWT_SECRET_KEY}

@@ -73,7 +73,7 @@ public class TeacherCourseController {
 
     @GetMapping("/get-teacher-courses/{teacherId}")
     public List<Long> getTeacherCourses(@PathVariable Long teacherId) {
-        List<Long> courseIds = courseRepository.findCourseIdsByTeacher(teacherId);
+        List<Long> courseIds = courseRepository.findCourseIdsByTeacherId(teacherId);
         return courseIds;
     }
 

@@ -65,7 +65,23 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(JWT);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+    public  Map<String, String> extractTokenFromHeaders(HttpServletRequest request) {
+        Map<String, String> tokens = new HashMap<>();
 
+        // Extract access token from "Authorization" header
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            tokens.put("access_token", authHeader.substring(7)); // remove "Bearer " prefix
+        }
+
+        // Extract refresh token if you send it in a custom header
+        String refreshTokenHeader = request.getHeader("Refresh-Token");
+        if (refreshTokenHeader != null) {
+            tokens.put("refresh_token", refreshTokenHeader);
+        }
+
+        return tokens.isEmpty() ? null : tokens;
+    }
     public Map<String, String> extractTokenFromCookies(HttpServletRequest request) {
         if (request.getCookies() == null) return null;
         Map<String, String> tokens = new HashMap<>();

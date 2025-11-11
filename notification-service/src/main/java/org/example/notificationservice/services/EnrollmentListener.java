@@ -20,9 +20,10 @@ public class EnrollmentListener {
     public void enrollmentListener(EmailMessage message) {
         List<Long> studentId = new ArrayList<>();
         studentId.add(message.studentId);
-        List<String> emails = userClient.getEmailsByIds(studentId);
+        String email = userClient.getUserById((message.studentId));
 
-        emailService.sendPaymentConfirmationEmail(emails.get(0));
+
+        emailService.sendPaymentConfirmationEmail(email);
     }
 
     public record EmailMessage(Long studentId, List<Long> courses) implements Serializable {}
