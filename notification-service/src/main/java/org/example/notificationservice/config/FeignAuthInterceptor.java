@@ -21,7 +21,7 @@ public class FeignAuthInterceptor implements RequestInterceptor {
     public void apply(RequestTemplate template) {
         String token = tokenHolder.get();
         if (token != null && !token.isEmpty()) {
-            template.header("Cookie", "access_token=" + token);
+            template.header("Authorization", "Bearer " + token);
         }
     }
 }

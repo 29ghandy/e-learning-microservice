@@ -79,7 +79,7 @@ public class AuthController {
     String getUserById(@PathVariable("id") Long id){
         return userRepository.findById(id).get().getEmail();
     }
-    @PostMapping("users/emails")
+    @PostMapping("/users/emails")
     public List<String> getEmailsByIds(@RequestBody List<Long> userIds) {
         return userRepository.findEmailsByIdIn(userIds);
     }

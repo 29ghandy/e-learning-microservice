@@ -30,14 +30,12 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String path = request.getRequestURI();
-        if (path.matches("/users/\\d+")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         Map<String, String> tokens = new HashMap<>();
-                tokens = jwtService.extractTokenFromCookies(request);
+        tokens = jwtService.extractTokenFromCookies(request);
+        if (tokens == null || tokens.isEmpty()) {
+            tokens = jwtService.extractTokenFromHeaders(request);
+        }
         final String username;
 
         if (tokens == null ||  tokens.isEmpty()) {

@@ -8,6 +8,6 @@ import java.util.List;
 
 @FeignClient(name = "course-service", url = "http://localhost:8082")
 public interface CourseClient {
-    @GetMapping("/teacher/get-teacher-courses/{teacherId}")
+    @GetMapping("/api/course/teacher/get-teacher-courses/{teacherId}")
     List<Long> getTeacherCourses(@PathVariable Long teacherId);
 }

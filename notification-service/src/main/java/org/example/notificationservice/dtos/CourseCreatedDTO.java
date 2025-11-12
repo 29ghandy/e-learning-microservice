@@ -6,11 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class CourseCreatedDTO {
     private Long teacherId;
-    private Long teacherName;
+    private String teacherName;
     private String courseName;
     private String description;
     private Double price;

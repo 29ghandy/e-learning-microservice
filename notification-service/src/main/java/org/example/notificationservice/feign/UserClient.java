@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 
-@FeignClient(name = "user-service", url = "http://localhost:8081")
+@FeignClient(name = "user-service", url = "http://localhost:8081/api/user")
 public interface UserClient {
     @GetMapping("/{id}")
     String getUserById(@PathVariable("id") Long id);
 
-    @PostMapping("users/emails")
+    @PostMapping("/users/emails")
     List<String> getEmailsByIds(@RequestBody List<Long> studentIds);
 }

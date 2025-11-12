@@ -68,13 +68,11 @@ public class JwtService {
     public  Map<String, String> extractTokenFromHeaders(HttpServletRequest request) {
         Map<String, String> tokens = new HashMap<>();
 
-        // Extract access token from "Authorization" header
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            tokens.put("access_token", authHeader.substring(7)); // remove "Bearer " prefix
+            tokens.put("access_token", authHeader.substring(7));
         }
 
-        // Extract refresh token if you send it in a custom header
         String refreshTokenHeader = request.getHeader("Refresh-Token");
         if (refreshTokenHeader != null) {
             tokens.put("refresh_token", refreshTokenHeader);

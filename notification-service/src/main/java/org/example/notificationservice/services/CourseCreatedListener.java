@@ -9,6 +9,7 @@ import org.example.notificationservice.feign.UserClient;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,18 +21,29 @@ public class CourseCreatedListener {
     private final EmailService emailService;
 
     @RabbitListener(queues = "course.created.update.queue")
-    public void CourseListener(CourseCreatedDTO course) {
+    public void CourseListener(CourseMessage message) {
+        CourseCreatedDTO course = message.course;
+
         try {
             FeignAuthInterceptor.setToken(course.getJwtToken());
 
+            if (course.getTeacherId() == null) {
+                System.out.println("null ya khwl");
+                return;
+            }
             Long teacherId = course.getTeacherId();
             List<Long> courseIds = courseClient.getTeacherCourses(teacherId);
-            List<Long> studentIds = enrollmentClient.getStudentsByTeacher(teacherId, courseIds);
+            System.out.println(courseIds.size());
+            //List<Long> studentIds = enrollmentClient.getStudentsByTeacher(teacherId, courseIds);
+            List<Long> studentIds = new ArrayList<>();
+            studentIds.add(1L);
             List<String> emails = userClient.getEmailsByIds(studentIds);
 
-            emailService.sendAnnouncementEmails(emails, course);
+            //emailService.sendAnnouncementEmails(emails, course);
         } finally {
             FeignAuthInterceptor.clear();
         }
     }
+
+    public record CourseMessage(CourseCreatedDTO course) {}
 }
