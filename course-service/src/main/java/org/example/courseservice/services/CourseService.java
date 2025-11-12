@@ -64,6 +64,7 @@ public class CourseService {
         courseCreatedDTO.setDescription(request.getCourseDescription());
         courseCreatedDTO.setPrice(request.getCoursePrice());
         courseCreatedDTO.setTeacherName(request.getTeacherName());
+        token = token.substring(7);
         courseCreatedDTO.setJwtToken(token);
         coursePublisher.publishCourse(courseCreatedDTO);
 

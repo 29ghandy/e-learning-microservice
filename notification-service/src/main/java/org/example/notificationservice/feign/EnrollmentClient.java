@@ -9,6 +9,6 @@ import java.util.List;
 
 @FeignClient(name = "enrollment-service", url = "http://localhost:8083")
 public interface EnrollmentClient {
-    @PostMapping("/enrollments/students/by-teacher/{teacherId}")
+    @PostMapping("api/enrollment/students/by-teacher/{teacherId}")
     List<Long> getStudentsByTeacher(@PathVariable Long teacherId, @RequestBody List<Long> courseIds);
 }

@@ -1,24 +1,145 @@
 services:
+  # --------------------------
+  # User Service
+  # --------------------------
   user-service:
     build:
       context: ./user-service
-      dockerfile: user-service/Dockerfile
+      dockerfile: Dockerfile
     container_name: user-service
     ports:
       - "8081:8081"
     environment:
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_USERNAME=${USER_DB_USERNAME}
+      - DB_PASSWORD=${USER_DB_PASSWORD}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}
       - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
       - EMAIL_SENDER_MAIL=${EMAIL_SENDER_MAIL}
       - EMAIL_SENDER_PASSWORD=${EMAIL_SENDER_PASSWORD}
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/userdb
-
     depends_on:
       - mysql
       - redis
+      - rabbitmq
+
+  # --------------------------
+  # Notification Service
+  # --------------------------
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    ports:
+      - "8084:8084"
+    environment:
+      - EMAIL_SENDER_MAIL=${EMAIL_SENDER_MAIL}
+      - EMAIL_SENDER_PASSWORD=${EMAIL_SENDER_PASSWORD}
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=admin
+      - SPRING_RABBITMQ_PASSWORD=admin
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    depends_on:
+      - rabbitmq
+
+  # --------------------------
+  # Enrollment Service
+  # --------------------------
+  enrollment-service:
+    build:
+      context: ./enrollment-service
+      dockerfile: Dockerfile
+    container_name: enrollment-service
+    ports:
+      - "8083:8083"
+    environment:
+      - DB_URL=${ENROLLMENT_DB_URL}
+      - DB_USERNAME=${ENROLLMENT_DB_USERNAME}
+      - DB_PASSWORD=${ENROLLMENT_DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - STRIPE_KEY=${STRIPE_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=admin
+      - SPRING_RABBITMQ_PASSWORD=admin
+    depends_on:
+      - redis
+      - rabbitmq
+      - user-service
+
+  # --------------------------
+  # Course Service
+  # --------------------------
+  course-service:
+    build:
+      context: ./course-service
+      dockerfile: Dockerfile
+    container_name: course-service
+    ports:
+      - "8082:8082"
+    environment:
+      - DB_URL=${COURSE_DB_URL}
+      - DB_USERNAME=${COURSE_DB_USERNAME}
+      - DB_PASSWORD=${COURSE_DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6378
+      - ELASTICSEARCH_HOST=elasticsearch
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=admin
+      - SPRING_RABBITMQ_PASSWORD=admin
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    depends_on:
+      - redis
+      - rabbitmq
+      - elasticsearch
+
+  # --------------------------
+  # Chat Service
+  # --------------------------
+  chat-service:
+    build:
+      context: ./chat-service
+      dockerfile: Dockerfile
+    container_name: chat-service
+    ports:
+      - "8085:8085"
+    environment:
+      - DB_URI=${DB_URI}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    depends_on:
+      - redis
+      - mongodb
+
+  # --------------------------
+  # API Gateway
+  # --------------------------
+  gateway:
+    build:
+      context: ./gateway-service
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    depends_on:
+      - user-service
+      - notification-service
+      - enrollment-service
+      - course-service
+      - chat-service
+      - rabbitmq
+
+  # --------------------------
+  # MySQL (User Service)
+  # --------------------------
   mysql:
     image: mysql:8.0
     container_name: mysql
@@ -27,9 +148,66 @@ services:
       MYSQL_DATABASE: userdb
     ports:
       - "3307:3306"
+    volumes:
+      - ./user-service/db-init:/docker-entrypoint-initdb.d
 
+  # --------------------------
+  # Redis
+  # --------------------------
   redis:
     image: redis:latest
     container_name: redis
     ports:
       - "6378:6379"
+
+  # --------------------------
+  # RabbitMQ
+  # --------------------------
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  # --------------------------
+  # Elasticsearch
+  # --------------------------
+  elasticsearch:
+    image: elasticsearch:8.10.1
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  # --------------------------
+  # MongoDB
+  # --------------------------
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+# --------------------------
+# Volumes
+# --------------------------
+volumes:
+  rabbitmq_data:
+  es_data:
+  mongo_data:

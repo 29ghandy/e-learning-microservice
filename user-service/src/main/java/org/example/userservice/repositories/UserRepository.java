@@ -2,6 +2,8 @@ package org.example.userservice.repositories;
 
 import org.example.userservice.models.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,5 +15,6 @@ public interface UserRepository  extends JpaRepository<Users, Long>  {
     Optional<Users> findByEmail(String email);
     boolean existsByEmail(String email);
     List<Users> findAllByEmailIn(Set<String> emails);
-    List<String> findEmailsByIdIn(List<Long> userIds);
+    @Query("SELECT u.email FROM Users u WHERE u.id IN :ids")
+    List<String> findEmailsByIdIn(@Param("ids") List<Long> ids);
 }

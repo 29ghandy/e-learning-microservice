@@ -34,12 +34,10 @@ public class CourseCreatedListener {
             Long teacherId = course.getTeacherId();
             List<Long> courseIds = courseClient.getTeacherCourses(teacherId);
             System.out.println(courseIds.size());
-            //List<Long> studentIds = enrollmentClient.getStudentsByTeacher(teacherId, courseIds);
-            List<Long> studentIds = new ArrayList<>();
-            studentIds.add(1L);
+            List<Long> studentIds = enrollmentClient.getStudentsByTeacher(teacherId, courseIds);
             List<String> emails = userClient.getEmailsByIds(studentIds);
 
-            //emailService.sendAnnouncementEmails(emails, course);
+            emailService.sendAnnouncementEmails(emails, course);
         } finally {
             FeignAuthInterceptor.clear();
         }
