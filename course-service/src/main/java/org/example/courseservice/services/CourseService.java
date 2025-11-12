@@ -40,7 +40,7 @@ public class CourseService {
         return courseRepository.findAll();
     }
 
-    public Course addCourse(CreateCourseRequest request) throws IOException {
+    public Course addCourse(CreateCourseRequest request, String token) throws IOException {
         Course course = new Course();
         course.setName(request.getCourseName());
         course.setCategory(request.getCategory());
@@ -64,6 +64,7 @@ public class CourseService {
         courseCreatedDTO.setDescription(request.getCourseDescription());
         courseCreatedDTO.setPrice(request.getCoursePrice());
         courseCreatedDTO.setTeacherName(request.getTeacherName());
+        courseCreatedDTO.setJwtToken(token);
         coursePublisher.publishCourse(courseCreatedDTO);
 
         return course;

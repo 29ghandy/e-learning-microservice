@@ -13,4 +13,7 @@ import java.util.List;
 public interface UserClient {
     @GetMapping("/{id}")
     String getUserById(@PathVariable("id") Long id);
+
+    @PostMapping("users/emails")
+    List<String> getEmailsByIds(@RequestBody List<Long> studentIds);
 }

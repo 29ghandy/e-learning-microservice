@@ -24,13 +24,13 @@ public class TeacherCourseController {
     private final CourseRepository courseRepository;
 
     @PostMapping("/create-course")
-    public ResponseEntity<?> createCourse(@ModelAttribute @Valid CreateCourseRequest requestBody, BindingResult bindingResult) {
+    public ResponseEntity<?> createCourse(@ModelAttribute @Valid CreateCourseRequest requestBody, @RequestHeader("Authorization") String token, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(bindingResult.getAllErrors(), HttpStatus.BAD_REQUEST);
         }
         try {
-            return ResponseEntity.ok().body(courseService.addCourse(requestBody));
+            return ResponseEntity.ok().body(courseService.addCourse(requestBody, token));
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }

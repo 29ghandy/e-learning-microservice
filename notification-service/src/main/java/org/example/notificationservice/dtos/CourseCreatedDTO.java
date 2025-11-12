@@ -14,4 +14,5 @@ public class CourseCreatedDTO {
     private String courseName;
     private String description;
     private Double price;
+    private String JwtToken;
 }
