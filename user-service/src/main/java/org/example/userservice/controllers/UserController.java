@@ -3,10 +3,8 @@ package org.example.userservice.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.userservice.requestBodies.ChangePasswordRequest;
-import org.example.userservice.requestBodies.ForgetPasswordRequest;
-import org.example.userservice.requestBodies.ResetPasswordRequest;
-import org.example.userservice.services.PasswordService;
+import org.example.userservice.requestBodies.*;
+import org.example.userservice.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -15,8 +13,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
-public class PasswordController {
-    private final PasswordService passwordService;
+public class UserController {
+    private final UserService passwordService;
+    private final UserService userService;
 
     @PutMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordRequest requestBody, BindingResult bindingResult) {
@@ -53,6 +52,32 @@ public class PasswordController {
 
 
             return ResponseEntity.ok().body( passwordService.resetPassword(requestBody));
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/add-interests")
+    public ResponseEntity<?> addInterests(@RequestBody @Valid AddInterestsRequest requestBody, BindingResult bindingResult)
+    {
+         if(bindingResult.hasErrors()) {
+             return new ResponseEntity<>(bindingResult.getAllErrors(), HttpStatus.BAD_REQUEST);
+         }
+       try {
+           return userService.addInterests(requestBody);
+       }
+        catch (Exception e) {
+           return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/add-social-links")
+    public ResponseEntity<?> addSocialLinks(@RequestBody @Valid AddSocialLinksRequest requestBody, BindingResult bindingResult)
+    {
+        if(bindingResult.hasErrors()) {
+            return new ResponseEntity<>(bindingResult.getAllErrors(), HttpStatus.BAD_REQUEST);
+        }
+        try {
+            return userService.addSocialLinks(requestBody);
         }
         catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

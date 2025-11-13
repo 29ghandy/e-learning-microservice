@@ -7,10 +7,7 @@ import org.example.courseservice.indexies.CourseIndex;
 import org.example.courseservice.models.Course;
 import org.example.courseservice.repositories.CourseRepository;
 import org.example.courseservice.repositories.CourseSearchRepository;
-import org.example.courseservice.requestBodies.CreateCourseRequest;
-import org.example.courseservice.requestBodies.CreateDiscountRequest;
-import org.example.courseservice.requestBodies.DeleteCourseRequest;
-import org.example.courseservice.requestBodies.UpdateCourseRequest;
+import org.example.courseservice.requestBodies.*;
 import org.example.courseservice.services.helper.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -140,7 +137,14 @@ public class CourseService {
     public List<CourseIndex> findByNameContainingIgnoreCase(String name){
         return courseSearchRepository.findByNameContainingIgnoreCase(name);
     }
-//    public ResponseEntity<?> rateCourse() {
-//
-//    }
+    public ResponseEntity<?> rateCourse(RateCourseRequest request) throws Exception {
+        Course course = courseRepository.findById(request.getCourseId()).get();
+        double rating = course.getAverageRating();
+        rating += request.getNumberOfStars();
+        rating /= 2.0;
+        course.setAverageRating(rating);
+        courseRepository.save(course);
+        courseSyncService.indexCourse(course);
+        return ResponseEntity.status(HttpStatus.OK).body(course);
+    }
 }

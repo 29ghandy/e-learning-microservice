@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.courseservice.indexies.CourseIndex;
 import org.example.courseservice.models.Course;
+import org.example.courseservice.requestBodies.RateCourseRequest;
 import org.example.courseservice.requestBodies.StreamCourseRequest;
 import org.example.courseservice.services.CourseService;
 import org.example.courseservice.services.FileService;
@@ -45,6 +46,19 @@ public class StudentCourseController {
         catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PutMapping("/rate")
+    public ResponseEntity<?> rateCourse(@Valid @RequestBody RateCourseRequest requestBody, BindingResult bindingResult) {
+      if(bindingResult.hasErrors()) {
+          return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+      }
+      try {
+          return courseService.rateCourse(requestBody);
+      }
+      catch (Exception e) {
+          return ResponseEntity.badRequest().body(e.getMessage());
+      }
     }
     @GetMapping("/stream-video")
     public ResponseEntity<?> streamVideo  (  @RequestParam Long studentId,

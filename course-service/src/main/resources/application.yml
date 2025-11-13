@@ -1,44 +1,43 @@
 server:
   port: 8082
+
 spring:
   application:
-    name:
-      course-service
+    name: course-service
   data:
-    redis:
-      host: localhost
-      port: 6378
-    elasticsearch:
-      client:
-        elasticsearch:
-          uris: http://localhost:9200
-      repositories:
-        enabled: true
+   redis:
+    host: localhost
+    port: 6378
+
+  elasticsearch:
+    uris: http://localhost:9200
+    repositories:
+      enabled: true
+
   main:
     allow-bean-definition-overriding: true
 
-
-    rabbitmq:
-      host: localhost
-      port: 5672
-      username: guest
-      password: guest
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 
   servlet:
     multipart:
-        location: /uploads
-        max-file-size: 500MB
-        max-request-size: 500MB
+      location: /uploads
+      max-file-size: 500MB
+      max-request-size: 500MB
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-
-
