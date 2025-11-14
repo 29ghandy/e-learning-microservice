@@ -10,10 +10,7 @@ import org.example.userservice.repositories.InterestRepository;
 import org.example.userservice.repositories.SocialLinkRepository;
 import org.example.userservice.repositories.StudentRepository;
 import org.example.userservice.repositories.UserRepository;
-import org.example.userservice.requestBodies.AddInterestsRequest;
-import org.example.userservice.requestBodies.AddSocialLinksRequest;
-import org.example.userservice.requestBodies.ChangePasswordRequest;
-import org.example.userservice.requestBodies.ResetPasswordRequest;
+import org.example.userservice.requestBodies.*;
 import org.example.userservice.services.helper.helperServices.EmailService;
 import org.example.userservice.services.helper.helperServices.OTPService;
 import org.example.userservice.services.helper.helperServices.RedisService;
@@ -84,6 +81,18 @@ public class UserService {
         socialLinkRepository.saveAll(socialUrls);
         return ResponseEntity.status(HttpStatus.CREATED).body("social links added successfully");
     }
+    public ResponseEntity<?>updateSocialLink(UpdateSocialLinkRequest request)
+    {
+        SocialLink socialLink = socialLinkRepository.findById(request.getSocialId()).orElseThrow(() ->new UsernameNotFoundException("Social link not found"));
+        socialLink.setUrl(request.getUrl());
+        socialLinkRepository.save(socialLink);
+        return ResponseEntity.status(HttpStatus.CREATED).body("social link updated successfully");
+    }
+    public ResponseEntity<?>deleteSocialLink(DeleteInterestRequest request)
+    {
+         socialLinkRepository.deleteById(request.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body("social links deleted successfully");
+    }
     public ResponseEntity<?>addInterests(AddInterestsRequest request)
     {
         List<Interest> interests = new ArrayList<>();
@@ -95,5 +104,11 @@ public class UserService {
         }
         interestRepository.saveAll(interests);
         return ResponseEntity.status(HttpStatus.CREATED).body("Interests added successfully");
+    }
+
+    public ResponseEntity<?>deleteInterest(DeleteInterestRequest request)
+    {
+        socialLinkRepository.deleteById(request.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body("social links deleted successfully");
     }
 }
