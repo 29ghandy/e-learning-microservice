@@ -83,4 +83,46 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PutMapping("/update-social-link")
+    public ResponseEntity<?> updateSocialLink(@RequestBody @Valid UpdateSocialLinkRequest requestBody, BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            return new ResponseEntity<>(bindingResult.getAllErrors(), HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            return userService.updateSocialLink(requestBody);
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete-social-link")
+    public ResponseEntity<?> deleteSocialLink(@RequestBody @Valid DeleteInterestRequest requestBody, BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            return new ResponseEntity<>(bindingResult.getAllErrors(), HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            return userService.deleteSocialLink(requestBody);
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete-interests")
+    public ResponseEntity<?> deleteInterests(@RequestBody @Valid DeleteInterestRequest requestBody, BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            return new ResponseEntity<>(bindingResult.getAllErrors(), HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            return userService.deleteInterest(requestBody);
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

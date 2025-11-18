@@ -9,5 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface SocialLinkRepository extends JpaRepository<SocialLink, Long> {
-    Optional<SocialLink> findByUserId(Long userId);
+    Optional<SocialLink> findById(Long userId);
 }
